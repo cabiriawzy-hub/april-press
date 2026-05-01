@@ -95,6 +95,38 @@ function matchFileToVolume(filename, items) {
   return null;
 }
 
+// Wrap inline volume references (卷三 / Volume 6) as anchor elements pointing
+// at the matching chapter section. Used by VolumeSection so cross-references
+// in body prose become clickable jumps to the corresponding chapter.
+const ZH_NUMERALS = {
+  "一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9,
+  "十":10,"十一":11,"十二":12,"十三":13,"十四":14,"十五":15,"十六":16,
+  "十七":17,"十八":18,"十九":19
+};
+function linkifyVolRefs(text, lang) {
+  if (typeof text !== "string") return text;
+  const re = lang === "zh"
+    ? /卷(十[一二三四五六七八九]?|[一二三四五六七八九])/g
+    : /Volume (\d+)/g;
+  const parts = [];
+  let last = 0, m, key = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    const num = lang === "zh" ? (ZH_NUMERALS[m[1]] || 0) : parseInt(m[1], 10);
+    if (num >= 1 && num <= 99) {
+      const id = "vol-" + String(num).padStart(2, "0");
+      parts.push(
+        <a key={"v" + key++} className="vol-link" href={"#" + id} data-target={id}>{m[0]}</a>
+      );
+    } else {
+      parts.push(m[0]);
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
 function useTweaks(defaults) {
   const STORAGE_KEY = "april-press:tweaks";
   const [tweaks, setTweaks] = useState(() => {
@@ -722,7 +754,7 @@ function VolumeSection({ item, lang, t, isLast, registerRef, coverSrc }) {
           <div className="dr-sub">{sub}</div>
           <blockquote className="dr-pull">{pull}</blockquote>
           <div className="dr-body">
-            {body.map((p, i) => <p key={i}>{p}</p>)}
+            {body.map((p, i) => <p key={i}>{linkifyVolRefs(p, lang)}</p>)}
           </div>
           {item.sources && item.sources.length > 0 && (
             <div className="dr-sources">
@@ -915,7 +947,16 @@ function Detail({ items, openId, lang, coverMap, onClose, onActiveChange, theme,
         "--ink-mute": "color-mix(in oklab, " + initialFg + " 55%, transparent)",
         "--rule": "color-mix(in oklab, " + initialFg + " 22%, transparent)",
       }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      onClick={(e) => {
+        if (e.target.classList && e.target.classList.contains("vol-link")) {
+          e.preventDefault();
+          const id = e.target.dataset.target;
+          const tgt = e.currentTarget.querySelector('[data-vol="' + id + '"]');
+          if (tgt) e.currentTarget.scrollTop = tgt.offsetTop;
+          return;
+        }
+        if (e.target === e.currentTarget) onClose();
+      }}>
 
       <div className="chapter-rail"
         onMouseMove={(e) => {

@@ -701,6 +701,22 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   max-width: 64ch;
   color: var(--ink-soft);
 }
+/* Inline cross-reference links to other chapters (卷 X / Volume N).
+   Scrolls within the detail container; styled subtly so the prose flow
+   isn't dominated by colored anchor text. */
+.dr-body .vol-link {
+  color: var(--drop, var(--accent));
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--drop, var(--accent)) 50%, transparent);
+  padding-bottom: 0.5px;
+  transition: border-color 180ms ease, color 180ms ease;
+  cursor: pointer;
+}
+.dr-body .vol-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 .dr-body p:first-child::first-letter {
   font-family: 'Newsreader', serif;
   float: left;
