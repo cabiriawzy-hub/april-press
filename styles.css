@@ -1040,9 +1040,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .stack-wrap { padding: 24px 0 80px; }
   .book { --bw: 360px; }
   .book-cover { height: 64px; }
+  /* Pre-rotation portrait box stays proportional to --bw (240×360),
+     so after rotate(-90°) the cover spans the full 360px lid width;
+     scaleY then squashes the visible 240 down to the lid's 64px. */
   .bc-image::before {
-    width: 64px;
-    height: 96px;
+    width: calc(var(--bw) * 2 / 3);
+    height: var(--bw);
     transform: translate(-50%, -50%) scaleY(calc(64 / 240)) rotate(-90deg);
   }
   .bc-frame { padding: 14px 16px; }
@@ -1141,10 +1144,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .stack { padding: 18px 8px 48px; }
   .book { --bw: 320px; }
   .book-cover { height: 58px; }
+  /* Pre-rotation 213×320 → rotate(-90°) → 320×213 → scaleY 58/213 → 320×58 */
   .bc-image::before {
-    width: 58px;
-    height: 86px;
-    transform: translate(-50%, -50%) scaleY(calc(58 / 220)) rotate(-90deg);
+    width: calc(var(--bw) * 2 / 3);
+    height: var(--bw);
+    transform: translate(-50%, -50%) scaleY(calc(58 / 213.33)) rotate(-90deg);
   }
   .bc-title { font-size: 15px; }
   .book-spine { height: 48px; padding: 0 14px; }
