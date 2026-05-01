@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="zh" data-lang="zh" data-theme="ink" class="lang-zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1280" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>四月 AI 简报 · April Press</title>
+  <script>document.write('<link rel="stylesheet" href="styles.css?v='+Date.now()+'" />')</script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+  <!-- Data is inlined so file:// previews work without a server.
+       Source of truth still lives in data.js for readability. -->
+  <script>document.write('<scr'+'ipt src="covers/manifest.js?v='+Date.now()+'"></scr'+'ipt>')</script>
+  <script>document.write('<scr'+'ipt src="data.js?v='+Date.now()+'"></scr'+'ipt>')</script>
+
+  <!-- App is inlined for the same reason. The same code lives in app.jsx. -->
+  <script type="text/babel" data-presets="react">
+/* April Press — 3D book stack with drag-to-rotate */
+
+const { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } = React;
+
+const ITEMS = window.BRIEFING_ITEMS;
+const CATS = window.CATEGORIES;
+
+const TWEAK_DEFAULTS = { lang: "zh", theme: "ink" };
+
+// Per-volume keyword hints for fuzzy matching of user-uploaded cover image filenames.
+// Used by matchFileToVolume below — order matters (most-specific first).
+const VOLUME_KEYWORDS = {
+  "vol-01": ["emotion", "情绪向量", "情绪", "interpretab"],
+  "vol-02": ["llm wiki", "llmwiki", "wiki", "karpathy"],
+  "vol-03": ["mythos", "神话", "stratechery"],
+  "vol-04": ["mirrorcode", "mirror code", "mirror", "metr"],
+  "vol-05": ["gbrain", "g-brain", "garry tan"],
+  "vol-06": ["harness engineering", "harness", "agent harness"],
+  "vol-07": ["opus 4.7", "opus4.7", "opus47", "opus"],
+  "vol-08": ["agent-first", "agent first", "agent化", "cursor", "roblox"],
+  "vol-09": ["gpt image 2", "image 2", "image2", "gptimage"],
+  "vol-10": ["application layer", "vercel", "ipo", "应用层"],
+  "vol-11": ["gpt-5.5", "gpt5.5", "gpt55", "5.5"],
+  "vol-12": ["diloco", "decoupled", "deepmind"],
+  "vol-13": ["forty billion", "40 billion", "40b", "四百亿", "anthropic 40"],
+  "vol-14": ["three-way open", "open-source", "开源", "gemma", "muse spark", "deepseek"],
+  "vol-15": ["automation", "自动化", "patel", "levie"],
+  "vol-16": ["subtraction", "收窄", "shed", "weil"],
+  "vol-17": ["brussels", "布鲁塞尔", "trilogue", "ai act", "eu"],
+};
+
+function matchFileToVolume(filename, items) {
+  if (!filename) return null;
+  const stem = filename.replace(/\.[^.]+$/, "").trim();
+  const lower = stem.toLowerCase();
+
+  // 1. Explicit "vol-NN" / "volNN" / "vNN" / leading or trailing NN
+  let m = stem.match(/(?:vol|v)[\s_\-.]?(\d{1,2})/i);
+  if (!m) m = stem.match(/^(\d{1,2})(?:\b|[\s_\-.])/);
+  if (!m) m = stem.match(/[\s_\-.](\d{1,2})$/);
+  if (m) {
+    const num = parseInt(m[1], 10);
+    if (num >= 1 && num <= items.length) {
+      const item = items.find(it => parseInt(it.no, 10) === num);
+      if (item) return item;
+    }
+  }
+
+  // 2. Chinese title substring
+  for (const item of items) {
+    if (item.title_zh && stem.includes(item.title_zh)) return item;
+  }
+
+  // 3. English title substring
+  for (const item of items) {
+    if (item.title_en && lower.includes(item.title_en.toLowerCase())) return item;
+  }
+
+  // 4. Topic keyword bank
+  for (const [vid, kws] of Object.entries(VOLUME_KEYWORDS)) {
+    for (const kw of kws) {
+      if (lower.includes(kw.toLowerCase())) {
+        const item = items.find(it => it.id === vid);
+        if (item) return item;
+      }
+    }
+  }
+
+  return null;
+}
+
+function useTweaks(defaults) {
+  const STORAGE_KEY = "april-press:tweaks";
+  const [tweaks, setTweaks] = useState(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return { ...defaults, ...JSON.parse(raw) };
+    } catch (e) {}
+    return { ...defaults };
+  });
+  const setTweak = useCallback((key, value) => {
+    setTweaks((prev) => {
+      const next = { ...prev, [key]: value };
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+  }, []);
+  return [tweaks, setTweak];
+}
+
+function categoryLabel(cat, lang) {
+  return CATS[cat] ? CATS[cat][lang] : cat;
+}
+
+function useDragRotate(initialRy = -22, initialRx = -4) {
+  const [rot, setRot] = useState({ ry: initialRy, rx: initialRx });
+  const [dragging, setDragging] = useState(false);
+  const ref = useRef({ startX: 0, startY: 0, startRy: 0, startRx: 0 });
+
+  const onPointerDown = useCallback((e) => {
+    e.preventDefault();
+    setDragging(true);
+    ref.current = {
+      startX: e.clientX, startY: e.clientY,
+      startRy: rot.ry, startRx: rot.rx,
+    };
+    e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
+  }, [rot]);
+
+  const onPointerMove = useCallback((e) => {
+    if (!dragging) return;
+    const dx = e.clientX - ref.current.startX;
+    const dy = e.clientY - ref.current.startY;
+    const ry = ref.current.startRy + dx * 0.5;
+    const rx = Math.max(-60, Math.min(70, ref.current.startRx - dy * 0.4));
+    setRot({ ry, rx });
+  }, [dragging]);
+
+  const onPointerUp = useCallback((e) => {
+    setDragging(false);
+    e.currentTarget.releasePointerCapture && e.currentTarget.releasePointerCapture(e.pointerId);
+  }, []);
+
+  return {
+    ry: rot.ry, rx: rot.rx, dragging,
+    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
+    reset: () => setRot({ ry: initialRy, rx: initialRx }),
+  };
+}
+
+function StackBook({ item, lang, onOpen, coverSrc }) {
+  const { spine } = item;
+  const title = lang === "zh" ? item.title_zh : item.title_en;
+  const sub = lang === "zh" ? item.sub_zh : item.sub_en;
+
+  const style = {
+    "--bg": spine.bg,
+    "--fg": spine.fg,
+    "--acc": spine.accent,
+    color: spine.fg,
+  };
+  if (coverSrc) style["--cover-image"] = "url('" + coverSrc + "')";
+
+  return (
+    <div className={"book" + (coverSrc ? " has-cover" : "")} style={style} onClick={() => onOpen(item)}>
+      <div className="book-cover">
+        {coverSrc
+          ? <div className="bc-image" />
+          : (
+            <div className="bc-frame">
+              <div className="bc-no">No. {item.no} · {categoryLabel(item.cat, lang).toUpperCase()}</div>
+              <div className="bc-mark" />
+              <div className="bc-title">{title}</div>
+              <div className="bc-sub">{sub}</div>
+            </div>
+          )}
+      </div>
+      <div className="book-spine">
+        <span className="bs-author">{item.author}</span>
+        <span className="bs-title">{title}</span>
+        <span className="bs-mark" />
+      </div>
+    </div>
+  );
+}
+
+/* === Three.js BigBook ===
+   Real 3D mesh (BoxGeometry with 6 per-face materials). Front uses the
+   user's PNG cover via TextureLoader; spine/back/pages are canvas-painted
+   procedural textures using each volume's spine color palette. Pointer
+   drag rotates the mesh — no CSS-3D depth-sort issues. Lazy-mounted via
+   IntersectionObserver so 17 vol-sections don't blow Chrome's WebGL
+   context limit (~16). */
+
+function makeClothNoise(g, w, h, amt) {
+  const img = g.getImageData(0, 0, w, h);
+  const d = img.data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const weave = (Math.sin(x * 1.4) + Math.cos(y * 1.6)) * 1.4;
+      const n = (Math.random() - 0.5) * amt + weave;
+      d[i]     = Math.max(0, Math.min(255, d[i]     + n));
+      d[i + 1] = Math.max(0, Math.min(255, d[i + 1] + n));
+      d[i + 2] = Math.max(0, Math.min(255, d[i + 2] + n));
+    }
+  }
+  g.putImageData(img, 0, 0);
+}
+
+function drawPageHeadband(g, x0, y0, w, h) {
+  // Woven headband at the spine end of the page block's head/tail face.
+  // Kept narrow — just the spine-corner ribbon, not a wide band.
+  // Base
+  g.fillStyle = "#cdb88e";
+  g.fillRect(x0, y0, w, h);
+  // Fine warp threads along the depth axis (one stripe per pixel-pair)
+  for (let dy = 0; dy < h; dy += 2) {
+    const k = (dy / 2) | 0;
+    g.fillStyle = k % 4 === 0 ? "#a78c5e" : (k % 4 === 1 ? "#e8dcb8" : (k % 4 === 2 ? "#bda472" : "#d8c498"));
+    g.fillRect(x0, y0 + dy, w, 2);
+  }
+  // Two delicate stitch lines — one near each edge of the band — short dashes
+  const stitchW = Math.max(2, Math.floor(w * 0.45));
+  const stitchOffsetX = (w - stitchW) / 2;
+  g.fillStyle = "rgba(20, 14, 8, 0.65)";
+  for (let dy = 4; dy < h; dy += 5) {
+    g.fillRect(x0 + stitchOffsetX, y0 + dy, stitchW, 1);
+  }
+  // Soft right-edge falloff where headband meets the page edges
+  const shadow = g.createLinearGradient(x0 + w - 4, 0, x0 + w + 2, 0);
+  shadow.addColorStop(0, "rgba(0,0,0,0)");
+  shadow.addColorStop(1, "rgba(0,0,0,0.25)");
+  g.fillStyle = shadow;
+  g.fillRect(x0 + w - 4, y0, 6, h);
+}
+
+function makeSpineTexture(item, lang) {
+  const W = 256, H = 1024;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = item.spine.bg;
+  g.fillRect(0, 0, W, H);
+  makeClothNoise(g, W, H, 9);
+  // Subtle inner shadows along the binding edges to give the cloth depth
+  const shade = g.createLinearGradient(0, 0, W, 0);
+  shade.addColorStop(0, "rgba(0,0,0,0.30)");
+  shade.addColorStop(0.10, "rgba(0,0,0,0)");
+  shade.addColorStop(0.90, "rgba(0,0,0,0)");
+  shade.addColorStop(1, "rgba(0,0,0,0.25)");
+  g.fillStyle = shade;
+  g.fillRect(0, 0, W, H);
+
+  // No. block at the top
+  g.fillStyle = item.spine.fg;
+  g.font = '500 22px "Newsreader", Georgia, serif';
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.fillText("No. " + item.no, W / 2, 70);
+  g.beginPath();
+  g.moveTo(W / 2 - 28, 100); g.lineTo(W / 2 + 28, 100);
+  g.strokeStyle = item.spine.fg; g.globalAlpha = 0.55; g.lineWidth = 1; g.stroke();
+  g.globalAlpha = 1;
+
+  // Vertical title — read top→bottom (rotate +90 then write left-to-right)
+  g.save();
+  g.translate(W / 2, H / 2);
+  g.rotate(Math.PI / 2);
+  g.fillStyle = item.spine.fg;
+  g.font = '500 38px "Newsreader", "Noto Serif SC", Georgia, serif';
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  const title = lang === "zh" ? item.title_zh : item.title_en;
+  g.fillText(title, 0, 0);
+  g.restore();
+
+  // Accent dot at the foot
+  g.fillStyle = item.spine.accent;
+  g.beginPath();
+  g.arc(W / 2, H - 70, 18, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = item.spine.bg;
+  g.beginPath();
+  g.arc(W / 2, H - 70, 7, 0, Math.PI * 2);
+  g.fill();
+
+  return new window.THREE.CanvasTexture(c);
+}
+
+function makeBackTexture(item) {
+  const W = 720, H = 1024;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = item.spine.bg;
+  g.fillRect(0, 0, W, H);
+  // Slightly darker than front
+  g.fillStyle = "rgba(0,0,0,0.16)";
+  g.fillRect(0, 0, W, H);
+  makeClothNoise(g, W, H, 7);
+  // Small mark, lower-left
+  g.fillStyle = item.spine.accent;
+  g.beginPath();
+  g.arc(70, H - 80, 22, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = item.spine.bg;
+  g.beginPath();
+  g.arc(70, H - 80, 8, 0, Math.PI * 2);
+  g.fill();
+  // April Press tag
+  g.fillStyle = item.spine.fg;
+  g.globalAlpha = 0.55;
+  g.font = '400 18px "JetBrains Mono", monospace';
+  g.textAlign = "left";
+  g.fillText("APRIL PRESS · No. " + item.no, 110, H - 75);
+  g.globalAlpha = 1;
+  return new window.THREE.CanvasTexture(c);
+}
+
+function makePagesTexture(face) {
+  // face: "head" | "tail" | "foredge"  —  head and tail get a headband strip
+  // along U=0 (spine side); foredge does not.
+  const W = 512, H = 1024;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = "#efe9d9";
+  g.fillRect(0, 0, W, H);
+  // Per-row jitter — every pixel row a faint sheet line
+  for (let y = 0; y < H; y++) {
+    const v = 215 + Math.random() * 30;
+    g.fillStyle = "rgba(" + (v - 28) + "," + (v - 38) + "," + (v - 58) + ",0.55)";
+    g.fillRect(0, y, W, 1);
+  }
+  // Binding shadows on left/right edges
+  const grad = g.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, "rgba(80,60,40,0.22)");
+  grad.addColorStop(0.12, "rgba(80,60,40,0)");
+  grad.addColorStop(0.88, "rgba(80,60,40,0)");
+  grad.addColorStop(1, "rgba(80,60,40,0.18)");
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+  // A few aging stains
+  for (let i = 0; i < 18; i++) {
+    g.fillStyle = "rgba(170,140,95," + (Math.random() * 0.06 + 0.02) + ")";
+    g.beginPath();
+    g.arc(Math.random() * W, Math.random() * H, Math.random() * 32 + 6, 0, Math.PI * 2);
+    g.fill();
+  }
+  // Headband — only on head and tail faces, at the spine-end (U=0). Just
+  // ~3% of texture, narrow refined band. The small woven ribbon you see
+  // peeking out at the top/bottom corners of the spine in real hardcovers.
+  if (face === "head" || face === "tail") {
+    drawPageHeadband(g, 0, 0, 16, H);
+  }
+  return new window.THREE.CanvasTexture(c);
+}
+
+function makeCoverEdgeTexture(item) {
+  // The visible edge of the hardcover board (cloth wrapping). Thin strip,
+  // mostly the cover color with weave noise. Used on cover-board top/bottom/
+  // foredge edges and on the inner faces of the spine cloth.
+  const W = 64, H = 256;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = item.spine.bg;
+  g.fillRect(0, 0, W, H);
+  makeClothNoise(g, W, H, 7);
+  // Slight darkening at the very ends so the edge doesn't read flat
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, "rgba(0,0,0,0.18)");
+  grad.addColorStop(0.12, "rgba(0,0,0,0)");
+  grad.addColorStop(0.88, "rgba(0,0,0,0)");
+  grad.addColorStop(1, "rgba(0,0,0,0.18)");
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+  return new window.THREE.CanvasTexture(c);
+}
+
+function makeInsideCoverTexture() {
+  // Endpaper — the inside face of front/back cover boards. Slightly warmer
+  // cream than the page edges to read as a different paper stock.
+  const W = 256, H = 256;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = "#f1e6cc";
+  g.fillRect(0, 0, W, H);
+  makeClothNoise(g, W, H, 4);
+  return new window.THREE.CanvasTexture(c);
+}
+
+function makeHeadbandTexture() {
+  // Headband — the small woven decorative ribbon at the head and tail of the
+  // spine in real hardcover books. Visible as alternating fine threads with
+  // dark stitching across. Mapped onto the top/bottom of the spine corner so
+  // it shows as a textured strip between the spine cloth and the page block.
+  const W = 256, H = 64;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  // Cream base
+  g.fillStyle = "#dac9a4";
+  g.fillRect(0, 0, W, H);
+  // Vertical thread stripes (the woven warp threads)
+  for (let x = 0; x < W; x += 4) {
+    const k = (x / 4) | 0;
+    g.fillStyle = k % 3 === 0 ? "#b8a778" : (k % 3 === 1 ? "#e6daba" : "#c4b48a");
+    g.fillRect(x, 0, 4, H);
+  }
+  // Dark stitches running across — short dashes at top and bottom edges
+  g.fillStyle = "rgba(28, 18, 10, 0.85)";
+  for (let x = 4; x < W; x += 8) {
+    g.fillRect(x, 4, 3, 8);          // upper stitch row
+    g.fillRect(x + 4, H - 12, 3, 8); // offset lower stitch row
+  }
+  // Subtle shadow at top + bottom edges to suggest the band is recessed
+  g.fillStyle = "rgba(0,0,0,0.35)";
+  g.fillRect(0, 0, W, 2);
+  g.fillRect(0, H - 2, W, 2);
+  return new window.THREE.CanvasTexture(c);
+}
+
+function makeFallbackFrontTexture(item, lang) {
+  const W = 720, H = 1024;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = item.spine.bg;
+  g.fillRect(0, 0, W, H);
+  makeClothNoise(g, W, H, 8);
+  // Title centered
+  g.fillStyle = item.spine.fg;
+  g.font = '500 64px "Newsreader", "Noto Serif SC", Georgia, serif';
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  const title = lang === "zh" ? item.title_zh : item.title_en;
+  // Wrap if needed
+  const words = title.split(/\s+|·/).filter(Boolean);
+  let line = "", lines = [];
+  words.forEach(w => {
+    const tryLine = (line + " " + w).trim();
+    if (g.measureText(tryLine).width > W * 0.75) { lines.push(line); line = w; }
+    else line = tryLine;
+  });
+  if (line) lines.push(line);
+  lines.forEach((l, i) => g.fillText(l, W/2, H/2 - 100 + i * 70));
+  // Author at bottom
+  g.font = '400 22px "Newsreader", Georgia, serif';
+  g.fillText(item.author, W / 2, H - 100);
+  return new window.THREE.CanvasTexture(c);
+}
+
+function BigBook({ item, lang, coverSrc }) {
+  const containerRef = useRef(null);
+  const [shouldMount, setShouldMount] = useState(false);
+
+  // Lazy-mount: only init the Three.js scene when this BigBook is near the
+  // viewport, so 17 vol-sections don't all hold WebGL contexts at once.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => entries[0].isIntersecting && setShouldMount(true),
+      { rootMargin: "300px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldMount) return;
+    const container = containerRef.current;
+    const THREE = window.THREE;
+    if (!container || !THREE) return;
+
+    const w0 = container.clientWidth || 360;
+    const h0 = container.clientHeight || 540;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, w0 / h0, 0.1, 100);
+    camera.position.set(0, 0, 4.6);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(w0, h0);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xcccccc, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 1.3);
+    key.position.set(-3, 4, 3); scene.add(key);
+    const fill = new THREE.DirectionalLight(0xeeeeee, 0.45);
+    fill.position.set(3, 1, -2); scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.25);
+    rim.position.set(0, -2, 3); scene.add(rim);
+
+    // Textures.
+    // For the front cover we route the PNG through a regular Image+Canvas
+    // and feed THREE a CanvasTexture rather than using TextureLoader directly.
+    // Reason: file:// pages treat each PNG as cross-origin and TextureLoader's
+    // default crossOrigin='anonymous' makes WebGL refuse a CORS-tainted
+    // texture (it just renders black). Routing via canvas keeps it
+    // same-origin from WebGL's POV. Also: synchronous fallback to a painted
+    // text texture if the PNG fails to load at all (broken path / network).
+    const frontMatRef = { current: null };       // assigned below; updated when image loads
+    const frontTexInitial = makeFallbackFrontTexture(item, lang);
+    const matFront = new THREE.MeshStandardMaterial({ map: frontTexInitial, roughness: 0.78 });
+    frontMatRef.current = matFront;
+
+    if (coverSrc) {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const cnv = document.createElement("canvas");
+          cnv.width = img.naturalWidth || 1024;
+          cnv.height = img.naturalHeight || 1536;
+          const cg = cnv.getContext("2d");
+          cg.drawImage(img, 0, 0, cnv.width, cnv.height);
+          // Probe taint — getImageData throws SecurityError if cross-origin tainted
+          cg.getImageData(0, 0, 1, 1);
+          const tex = new THREE.CanvasTexture(cnv);
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.anisotropy = 8;
+          if (frontMatRef.current) {
+            frontMatRef.current.map?.dispose();
+            frontMatRef.current.map = tex;
+            frontMatRef.current.needsUpdate = true;
+          }
+        } catch (_) {
+          // Canvas tainted (e.g., file:// cross-dir under strict policy)
+          // — fallback already in place, do nothing.
+        }
+      };
+      // No crossOrigin attribute — anonymous CORS would force a header check
+      // that file:// can't satisfy. Plain image loads from same-origin file://
+      // work; we then transcribe to a non-tainted canvas (best-effort).
+      img.src = coverSrc;
+    }
+    const spineTex = makeSpineTexture(item, lang);
+    const backTex  = makeBackTexture(item);
+    const edgeTex  = makeCoverEdgeTexture(item);
+    const insideTex = makeInsideCoverTexture();
+    const pagesTexA = makePagesTexture("foredge");
+    const pagesTexB = makePagesTexture("head");
+    const pagesTexC = makePagesTexture("tail");
+
+    const matBack  = new THREE.MeshStandardMaterial({ map: backTex,  roughness: 0.80 });
+    const matSpine = new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.78 });
+    const matEdge  = new THREE.MeshStandardMaterial({ map: edgeTex,  roughness: 0.80 });
+    const matInside = new THREE.MeshStandardMaterial({ map: insideTex, roughness: 0.92 });
+    const matPgF   = new THREE.MeshStandardMaterial({ map: pagesTexA, roughness: 0.95 });
+    const matPgT   = new THREE.MeshStandardMaterial({ map: pagesTexB, roughness: 0.95 });
+    const matPgB   = new THREE.MeshStandardMaterial({ map: pagesTexC, roughness: 0.95 });
+
+    // Layered hardcover construction:
+    //   Wb × Hb × Dt = total book footprint
+    //   ct           = cover board thickness (front/back)
+    //   po           = page overhang on top/bottom/foredge
+    //   coverInset   = cover boards stop short of the spine side by ct+1mm,
+    //                  so cover-front and spine-cloth-front DON'T sit on the
+    //                  exact same z plane in overlapping x — that overlap is
+    //                  what was z-fighting on the cover's spine-side edge.
+    //                  The 1mm slot also reads as a recessed binding hinge.
+    //   pageGap      = 1mm clearance between page block and spine cloth in x
+    //   pageDepthGap = 1mm clearance from cover boards' inner faces in z
+    const Wb = 1.30, Hb = 1.85, Dt = 0.34;
+    const ct = 0.025, po = 0.030;
+    const coverInset = ct + 0.001;
+    const Wcover = Wb - coverInset;
+    const xCover = coverInset / 2;
+    const Wp = Wb - coverInset - po;
+    const Hp = Hb - 2 * po;
+    const Dp = Dt - 2 * ct - 0.002;
+    const x_off = (coverInset - po) / 2;
+
+    const book = new THREE.Group();
+
+    // Page block (cream paper, six pages-textured faces; only +X/+Y/-Y are
+    // visible — others are hidden by the cover sandwich).
+    const pageGeo = new THREE.BoxGeometry(Wp, Hp, Dp);
+    const pageBlock = new THREE.Mesh(pageGeo, [
+      matPgF, matPgF,   // +X foredge (visible),  -X spine side (hidden)
+      matPgT, matPgB,   // +Y head (visible),     -Y tail (visible)
+      matPgF, matPgF,   // +Z front (hidden),     -Z back  (hidden)
+    ]);
+    pageBlock.position.set(x_off, 0, 0);
+
+    // Front cover board — narrower than the book; its left edge stops at
+    // (-Wb/2 + coverInset), leaving a 1mm slot to the spine cloth. +Z = PNG
+    // cover, -Z = inside endpaper, edges = cover cloth.
+    const frontGeo = new THREE.BoxGeometry(Wcover, Hb, ct);
+    const frontCover = new THREE.Mesh(frontGeo, [
+      matEdge, matEdge, matEdge, matEdge, matFront, matInside,
+    ]);
+    frontCover.position.set(xCover, 0, Dt / 2 - ct / 2);
+
+    // Back cover board — same inset as front.
+    const backGeo = new THREE.BoxGeometry(Wcover, Hb, ct);
+    const backCoverMesh = new THREE.Mesh(backGeo, [
+      matEdge, matEdge, matEdge, matEdge, matInside, matBack,
+    ]);
+    backCoverMesh.position.set(xCover, 0, -Dt / 2 + ct / 2);
+
+    // Spine cloth — full Dt depth, ct width, on the leftmost edge. Cover
+    // boards stop ct+1mm short, so spine cloth and cover board live in
+    // disjoint x ranges — no shared plane = no z-fight at any angle.
+    const spineGeo = new THREE.BoxGeometry(ct, Hb, Dt);
+    const spineCover = new THREE.Mesh(spineGeo, [
+      matEdge,  // +X (inner — abuts page block; hidden)
+      matSpine, // -X outer spine face (with title)
+      matEdge, matEdge, matEdge, matEdge,
+    ]);
+    spineCover.position.set(-Wb / 2 + ct / 2, 0, 0);
+
+    // (Headbands are baked into the spine cloth texture itself — see
+    // drawHeadbandStrip / makeSpineTexture. They render co-planar with
+    // the spine cloth so they can't z-fight against any neighbouring face.)
+
+    book.add(pageBlock, frontCover, backCoverMesh, spineCover);
+    scene.add(book);
+    book.rotation.set(-0.18, 0.42, 0);
+
+    // Drag rotation
+    let dragging = false, sx = 0, sy = 0, srx = 0, sry = 0;
+    const dom = renderer.domElement;
+    const onDown = (e) => {
+      dragging = true; sx = e.clientX; sy = e.clientY;
+      srx = book.rotation.x; sry = book.rotation.y;
+      try { dom.setPointerCapture(e.pointerId); } catch (_) {}
+      dom.style.cursor = "grabbing";
+    };
+    const onMove = (e) => {
+      if (!dragging) return;
+      book.rotation.y = sry + (e.clientX - sx) * 0.008;
+      book.rotation.x = Math.max(-1.2, Math.min(1.2, srx - (e.clientY - sy) * 0.008));
+    };
+    const onUp = (e) => {
+      dragging = false;
+      try { dom.releasePointerCapture(e.pointerId); } catch (_) {}
+      dom.style.cursor = "grab";
+    };
+    dom.style.cursor = "grab";
+    dom.addEventListener("pointerdown", onDown);
+    dom.addEventListener("pointermove", onMove);
+    dom.addEventListener("pointerup", onUp);
+    dom.addEventListener("pointercancel", onUp);
+
+    // Render loop
+    let raf;
+    const tick = () => { raf = requestAnimationFrame(tick); renderer.render(scene, camera); };
+    tick();
+
+    // Resize
+    const ro = new ResizeObserver(() => {
+      const w = container.clientWidth, h = container.clientHeight;
+      if (!w || !h) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+    ro.observe(container);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      dom.removeEventListener("pointerdown", onDown);
+      dom.removeEventListener("pointermove", onMove);
+      dom.removeEventListener("pointerup", onUp);
+      dom.removeEventListener("pointercancel", onUp);
+      [matFront, matBack, matSpine, matEdge, matInside, matPgF, matPgT, matPgB].forEach((m) => {
+        if (m && m.map) m.map.dispose();
+        if (m) m.dispose();
+      });
+      pageGeo.dispose();
+      frontGeo.dispose();
+      backGeo.dispose();
+      spineGeo.dispose();
+      renderer.dispose();
+      if (dom.parentNode) dom.parentNode.removeChild(dom);
+    };
+  }, [shouldMount, item.id, coverSrc, lang]);
+
+  return <div ref={containerRef} className="big-book-3d" />;
+}
+
+function VolumeSection({ item, lang, t, isLast, registerRef, coverSrc }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    registerRef(item.id, ref.current);
+    return () => { registerRef(item.id, null); };
+  }, [item.id]);
+
+  const title = lang === "zh" ? item.title_zh : item.title_en;
+  const sub   = lang === "zh" ? item.sub_zh : item.sub_en;
+  const pull  = lang === "zh" ? item.pull_zh : item.pull_en;
+  const body  = lang === "zh" ? item.body_zh : item.body_en;
+
+  return (
+    <section className="vol-section" ref={ref} data-vol={item.id} data-vol-no={item.no}
+      style={{ "--drop": item.spine.drop || "var(--accent)" }}>
+      <div className="vol-header">
+        <span className="vol-meta">April Press · {t.vol} {item.no} / {String(ITEMS.length).padStart(2, "0")} · {t.readMin(item.minutes)}</span>
+      </div>
+      <div className="detail-spread">
+        <div className="detail-left">
+          <BigBook item={item} lang={lang} coverSrc={coverSrc} />
+        </div>
+        <div className="detail-right">
+          <div className="dr-kicker">{categoryLabel(item.cat, lang)} · {t.vol} {item.no}</div>
+          <h1 className="dr-title">{title}</h1>
+          <div className="dr-author">{item.author} · {item.date}</div>
+          <div className="dr-divider" />
+          <div className="dr-sub">{sub}</div>
+          <blockquote className="dr-pull">{pull}</blockquote>
+          <div className="dr-body">
+            {body.map((p, i) => <p key={i}>{p}</p>)}
+          </div>
+          {item.sources && item.sources.length > 0 && (
+            <div className="dr-sources">
+              <div className="dr-sources-label">{t.sources}</div>
+              <ul>
+                {item.sources.map((s, i) => (
+                  <li key={i}>
+                    <a href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="dr-foot">
+            <span>{t.end}</span>
+            <span>April Press · No. {item.no}</span>
+          </div>
+        </div>
+      </div>
+      {!isLast && (
+        <div className="vol-bridge">
+          <span className="vol-bridge-dot" />
+          <span className="vol-bridge-text">{t.continue}</span>
+          <span className="vol-bridge-dot" />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Detail({ items, openId, lang, coverMap, onClose, onActiveChange, theme, setTheme, setLang, themesT }) {
+  const isOpen = openId != null;
+  const containerRef = useRef(null);
+  const sectionRefs = useRef(new Map());
+  const [activeId, setActiveId] = useState(openId || (items[0] && items[0].id));
+  const [filter, setFilter] = useState("all");
+
+  // Reset the filter to "all" only when detail TRANSITIONS from closed to open
+  // (so the article the user just clicked is guaranteed visible). Subsequent
+  // openId changes from scrolling inside detail must NOT reset the filter,
+  // otherwise clicking a category Tab triggers a scroll → onActiveChange →
+  // openId change → filter reset, undoing the user's selection.
+  const prevOpenIdRef = useRef(null);
+  useEffect(() => {
+    if (openId != null && prevOpenIdRef.current == null) setFilter("all");
+    prevOpenIdRef.current = openId;
+  }, [openId]);
+
+  const visibleItems = useMemo(() =>
+    filter === "all" ? items : items.filter(i => i.cat === filter),
+    [items, filter]
+  );
+  const counts = useMemo(() => {
+    const c = { all: items.length };
+    items.forEach(i => { c[i.cat] = (c[i.cat] || 0) + 1; });
+    return c;
+  }, [items]);
+
+  // When the filter changes and the current active article is filtered out,
+  // jump to the first visible chapter.
+  useEffect(() => {
+    if (!isOpen) return;
+    const root = containerRef.current;
+    if (!root) return;
+    const stillVisible = visibleItems.some(it => it.id === activeId);
+    if (stillVisible) return;
+    const first = visibleItems[0];
+    if (!first) return;
+    const target = root.querySelector('[data-vol="' + first.id + '"]');
+    if (target) {
+      root.scrollTop = target.offsetTop;
+      setActiveId(first.id);
+      if (onActiveChange) onActiveChange(first.id);
+    }
+  }, [filter, visibleItems, isOpen]);
+
+  const t = lang === "zh"
+    ? { close: "关闭", end: "— 完 —", vol: "卷",
+        readMin: m => "约 " + m + " 分钟阅读",
+        continue: "继续翻页", index: "目录", sources: "来源" }
+    : { close: "Close", end: "— End —", vol: "Volume",
+        readMin: m => m + " min read",
+        continue: "continue", index: "Index", sources: "Sources" };
+
+  const registerRef = (id, el) => {
+    if (el) sectionRefs.current.set(id, el);
+    else sectionRefs.current.delete(id);
+  };
+
+  const activeItem = items.find(it => it.id === activeId) || items[0];
+  // Initial / fallback bg colors. Real-time scroll blending happens directly via setProperty
+  // in the scroll handler below — this avoids React re-rendering Detail on every scroll frame.
+  const initialBg = "color-mix(in oklab, " + activeItem.spine.bg + " 65%, var(--paper))";
+  const initialFg = activeItem.spine.fg;
+  const initialAccent = activeItem.spine.accent;
+  const initialDrop = activeItem.spine.drop || activeItem.spine.accent;
+
+  // Layout effect so scrollTop is set BEFORE the scroll-watcher's initial
+  // onScroll() fires (which would otherwise see scrollTop=0, treat vol-01 as
+  // active, and overwrite openId via onActiveChange).
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const root = containerRef.current;
+    if (!root) return;
+    setActiveId(openId);
+    const target = root.querySelector('[data-vol="' + openId + '"]');
+    if (target) {
+      root.scrollTop = target.offsetTop;
+    }
+  }, [openId, isOpen]);
+
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    let raf = null;
+    let lastActiveId = activeId;
+
+    const writeColors = (curItem, nxtItem, p) => {
+      const tPct = (p * 100).toFixed(2);
+      const blended = "color-mix(in oklab, " + curItem.spine.bg + ", " + nxtItem.spine.bg + " " + tPct + "%)";
+      const bg = "color-mix(in oklab, " + blended + " 65%, var(--paper))";
+      const fg = "color-mix(in oklab, " + curItem.spine.fg + ", " + nxtItem.spine.fg + " " + tPct + "%)";
+      const acc = "color-mix(in oklab, " + curItem.spine.accent + ", " + nxtItem.spine.accent + " " + tPct + "%)";
+      const curDrop = curItem.spine.drop || curItem.spine.accent;
+      const nxtDrop = nxtItem.spine.drop || nxtItem.spine.accent;
+      const drop = "color-mix(in oklab, " + curDrop + ", " + nxtDrop + " " + tPct + "%)";
+      root.style.setProperty("--detailBg", bg);
+      root.style.setProperty("--detailFg", fg);
+      root.style.setProperty("--accent", acc);
+      root.style.setProperty("--drop", drop);
+      root.style.setProperty("--ink", fg);
+      root.style.setProperty("--ink-soft", "color-mix(in oklab, " + fg + " 88%, transparent)");
+      root.style.setProperty("--ink-mute", "color-mix(in oklab, " + fg + " 55%, transparent)");
+      root.style.setProperty("--rule", "color-mix(in oklab, " + fg + " 22%, transparent)");
+    };
+
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        const viewportMid = root.scrollTop + root.clientHeight * 0.4;
+        let bestEl = null, bestItem = null, bestIdx = -1, bestDist = Infinity;
+        sectionRefs.current.forEach((el, id) => {
+          const top = el.offsetTop;
+          const bot = top + el.offsetHeight;
+          if (top <= viewportMid && bot >= viewportMid) {
+            const dist = Math.abs(top + el.offsetHeight / 2 - viewportMid);
+            if (dist < bestDist) {
+              bestDist = dist; bestEl = el;
+              bestItem = items.find(it => it.id === id);
+              bestIdx = items.findIndex(it => it.id === id);
+            }
+          }
+        });
+        if (!bestItem || !bestEl) return;
+        const top = bestEl.offsetTop;
+        const h = bestEl.offsetHeight;
+        const p = Math.max(0, Math.min(1, (root.scrollTop - top) / Math.max(1, h - root.clientHeight)));
+        const nxtItem = items[bestIdx + 1] || bestItem;
+        writeColors(bestItem, nxtItem, p);
+        if (bestItem.id !== lastActiveId) {
+          lastActiveId = bestItem.id;
+          setActiveId(bestItem.id);
+          if (onActiveChange) onActiveChange(bestItem.id);
+        }
+      });
+    };
+    root.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => { root.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, [items, onActiveChange]);
+
+  const rail = items.map(it => ({
+    id: it.id,
+    no: it.no,
+    paraCount: (lang === "zh" ? it.body_zh : it.body_en).length + 3,
+  }));
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="detail open" ref={containerRef}
+      style={{
+        "--detailBg": initialBg,
+        "--detailFg": initialFg,
+        "--accent": initialAccent,
+        "--drop": initialDrop,
+        "--ink": initialFg,
+        "--ink-soft": "color-mix(in oklab, " + initialFg + " 88%, transparent)",
+        "--ink-mute": "color-mix(in oklab, " + initialFg + " 55%, transparent)",
+        "--rule": "color-mix(in oklab, " + initialFg + " 22%, transparent)",
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+
+      <div className="chapter-rail"
+        onMouseMove={(e) => {
+          // Dock-zoom: each row gets a CSS var --prox in [0,1] based on
+          // vertical distance to the cursor. The single row with the highest
+          // prox also gets the .hover class so its title fades in alongside
+          // the active row's title.
+          const rail = e.currentTarget;
+          const cy = e.clientY;
+          const rows = rail.querySelectorAll(".rail-row");
+          const falloff = 80;
+          let maxProx = 0, maxRow = null;
+          rows.forEach(row => {
+            const r = row.getBoundingClientRect();
+            const rowCy = r.top + r.height / 2;
+            const d = Math.abs(cy - rowCy);
+            const prox = Math.max(0, 1 - d / falloff);
+            const eased = prox * prox * (3 - 2 * prox);
+            row.style.setProperty("--prox", eased.toFixed(3));
+            if (eased > maxProx) { maxProx = eased; maxRow = row; }
+          });
+          rows.forEach(row => {
+            if (row === maxRow && maxProx > 0.25) row.classList.add("hover");
+            else row.classList.remove("hover");
+          });
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.querySelectorAll(".rail-row").forEach(r => {
+            r.style.setProperty("--prox", "0");
+            r.classList.remove("hover");
+          });
+        }}>
+        <button className="ch-back" onClick={onClose}>←</button>
+        {visibleItems.map(it => {
+          const isActive = it.id === activeId;
+          // Per-volume varied base width — deterministic from item.no so it
+          // doesn't reflow on re-render. Range 16-30 px feels organic.
+          const n = parseInt(it.no, 10) || 1;
+          const baseW = 16 + ((n * 7 + 3) % 15);
+          const title = lang === "zh" ? it.title_zh : it.title_en;
+          return (
+            <div key={it.id} className={"rail-row" + (isActive ? " active" : "")}
+              onClick={() => {
+                const el = sectionRefs.current.get(it.id);
+                if (el && containerRef.current) containerRef.current.scrollTop = el.offsetTop;
+              }}>
+              <span className="rail-line"
+                style={{ "--baseW": baseW + "px" }} />
+              <span className="rail-title">{title}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="detail-top-fixed">
+        <span className="dt-meta">April Press · {t.vol} {activeItem.no} / {String(items.length).padStart(2, "0")}</span>
+        <div className="dt-filters">
+          {Object.keys(CATS).map(k => {
+            const n = counts[k] || 0;
+            if (k !== "all" && n === 0) return null;
+            return (
+              <button key={k}
+                className={filter === k ? "active" : ""}
+                onClick={() => setFilter(k)}>
+                {categoryLabel(k, lang)}
+                <span className="count">{n}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="dt-right">
+          {setTheme && (
+            <div className="theme-swatches" role="group" aria-label="theme">
+              {["ink", "paper", "navy"].map(k => (
+                <button key={k}
+                  className={"swatch swatch-" + k + (theme === k ? " active" : "")}
+                  onClick={() => setTheme(k)}
+                  title={themesT && themesT[k]}
+                  aria-label={themesT && themesT[k]}
+                />
+              ))}
+            </div>
+          )}
+          {setLang && (
+            <div className="lang-toggle" role="group" aria-label={lang === "zh" ? "语言" : "language"}>
+              <button className={lang === "zh" ? "active" : ""} onClick={() => setLang("zh")} title="中文" aria-label="中文">文</button>
+              <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} title="English" aria-label="English">A</button>
+            </div>
+          )}
+          <button className="close" onClick={onClose} aria-label={t.close} title={t.close}>
+            <span className="x" />
+          </button>
+        </div>
+      </div>
+
+      <div className="detail-stream">
+        {visibleItems.map((it, i) => (
+          <VolumeSection key={it.id} item={it} lang={lang} t={t}
+            isLast={i === visibleItems.length - 1}
+            registerRef={registerRef}
+            coverSrc={coverMap && coverMap[it.id]}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const lang = tweaks.lang || "zh";
+  const theme = tweaks.theme || "ink";
+
+  const [filter, setFilter] = useState("all");
+  const [openId, setOpenId] = useState(null);
+  const [coverMap, setCoverMap] = useState(() => ({ ...(window.COVER_ASSETS || {}) }));
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("covers/").then(r => r.ok ? r.text() : "").then(html => {
+      if (cancelled || !html) return;
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const files = [...doc.querySelectorAll("a")]
+        .map(a => a.getAttribute("href") || "")
+        .filter(href => /\.(png|jpe?g|webp|gif|avif)$/i.test(href))
+        .map(href => decodeURIComponent(href.split("/").pop()));
+      const auto = {};
+      for (const file of files) {
+        const matched = matchFileToVolume(file, ITEMS);
+        if (matched && !auto[matched.id]) auto[matched.id] = "covers/" + file;
+      }
+      // manual manifest overrides auto
+      setCoverMap(prev => ({ ...auto, ...(window.COVER_ASSETS || {}), ...prev }));
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.classList.toggle("lang-zh", lang === "zh");
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [lang, theme]);
+
+  useEffect(() => {
+    function onKey(e) {
+      if (openId == null) return;
+      if (e.key === "Escape") setOpenId(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openId]);
+
+  useEffect(() => {
+    document.body.style.overflow = openId != null ? "hidden" : "";
+  }, [openId]);
+
+  const counts = useMemo(() => {
+    const c = { all: ITEMS.length };
+    ITEMS.forEach(i => { c[i.cat] = (c[i.cat] || 0) + 1; });
+    return c;
+  }, []);
+
+  const visible = useMemo(() =>
+    filter === "all" ? ITEMS : ITEMS.filter(i => i.cat === filter),
+    [filter]
+  );
+
+  const setLang = (L) => setTweak("lang", L);
+  const setTheme = (Th) => setTweak("theme", Th);
+
+  const T = lang === "zh"
+    ? { topLeft: "April Press", issue: "Vol. 18 · 二〇二六年四月",
+        eyebrow: "卷 一八", title1: "四月", title2: "AI 简报",
+        sub: "四月，AI 的工程重心第一次明确从模型本身，移到了模型外那一层。",
+        editor: "本期 " + ITEMS.length + " 篇，写在四月——一个节奏太密、需要慢读的月份。模型按周发布、harness 自成学科、开源同月被拆成三种立场、OpenAI 第一次像在做减法。每一篇单独看是新闻；合起来看，是 2026 年 AI 工程在朝哪个方向收敛。",
+        col1: "April Press · 编辑独立选编。",
+        col2: "Set in Newsreader & Noto Serif。",
+        col3: "Vol. 18 · 2026 年 4 月 30 日付印。",
+        themeLabel: "主题",
+        themes: { ink: "深墨", paper: "米白", navy: "海军" },
+      }
+    : { topLeft: "April Press", issue: "Vol. 18 · April 2026",
+        eyebrow: "Volume 18", title1: "April", title2: "AI Briefing",
+        sub: "In April, AI's engineering center of gravity moved — clearly, for the first time — from the model itself to the layer around it.",
+        editor: "" + ITEMS.length + " pieces from April — a month dense enough that it has to be read slowly. Models shipped weekly, harness became a discipline, open-source split three ways in a single month, and OpenAI looked, for the first time, like it was subtracting. Each piece on its own is news; read together, they're the direction AI engineering is settling toward in 2026.",
+        col1: "April Press is independently edited.",
+        col2: "Set in Newsreader & JetBrains Mono.",
+        col3: "Vol. 18 · went to press April 30, 2026.",
+        themeLabel: "Theme",
+        themes: { ink: "Ink", paper: "Paper", navy: "Navy" },
+      };
+
+  return (
+    <>
+      <div className="topbar">
+        <div className="brand">
+          <span className="mark" />
+          <span>{T.topLeft} · {T.issue}</span>
+        </div>
+        <div className="topbar-controls">
+          <div className="theme-swatches" role="group" aria-label={T.themeLabel}>
+            {["ink", "paper", "navy"].map(k => (
+              <button key={k}
+                className={"swatch swatch-" + k + (theme === k ? " active" : "")}
+                onClick={() => setTheme(k)}
+                title={T.themes[k]}
+                aria-label={T.themes[k]}
+              />
+            ))}
+          </div>
+          <div className="lang-toggle" role="group" aria-label={lang === "zh" ? "语言" : "language"}>
+            <button className={lang === "zh" ? "active" : ""} onClick={() => setLang("zh")} title="中文" aria-label="中文">文</button>
+            <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} title="English" aria-label="English">A</button>
+          </div>
+        </div>
+      </div>
+
+      <header className="masthead">
+        <div className="mh-eyebrow">
+          <span>{T.eyebrow}</span>
+          <span className="dot" />
+          <span>{ITEMS.length} {lang === "zh" ? "篇" : "PIECES"}</span>
+          <span className="dot" />
+          <span>{lang === "zh" ? "二〇二六年四月" : "APRIL 2026"}</span>
+        </div>
+        <h1 className="mh-title">
+          {lang === "zh"
+            ? <>四月<span className="ampersand"> · </span>AI 简报</>
+            : <>{T.title1} <span className="ampersand">&amp;</span> <em>{T.title2}</em></>
+          }
+        </h1>
+        <div className="mh-sub">{T.sub}</div>
+      </header>
+
+      <div className="filters">
+        {Object.keys(CATS).map(k => (
+          <button key={k} className={filter === k ? "active" : ""} onClick={() => setFilter(k)}>
+            {categoryLabel(k, lang)}
+            <span className="count">{counts[k] || 0}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="editors">
+        <div className="editors-label">{lang === "zh" ? "导读" : "From the Editor"}</div>
+        <p className="editors-body">{T.editor}</p>
+      </div>
+
+      <section className="stack-wrap">
+        <div className="stack">
+          {visible.map((item, i) => (
+            <div className="stack-item" key={item.id} style={{ animationDelay: (i * 60) + "ms" }}>
+              <StackBook item={item} lang={lang} onOpen={(it) => setOpenId(it.id)} coverSrc={coverMap[item.id]} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="colophon">
+        <div>{T.col1}</div>
+        <div className="center">{T.col2}</div>
+        <div className="right">{T.col3}</div>
+      </footer>
+
+      <Detail
+        items={ITEMS}
+        openId={openId}
+        lang={lang}
+        coverMap={coverMap}
+        onClose={() => setOpenId(null)}
+        onActiveChange={(id) => setOpenId(id)}
+        theme={theme}
+        setTheme={setTheme}
+        setLang={setLang}
+        themesT={T.themes}
+      />
+    </>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,966 @@
+/* April Press — 3D book bookshelf */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap');
+
+:root {
+  --paper:        #1A1814;
+  --paper-2:      #221F19;
+  --ink:          #EDE6D6;
+  --ink-soft:     #D6CFC0;
+  --ink-mute:     #8A8478;
+  --rule:         #3A332A;
+  --accent:       #D7906A;
+  --accent-soft:  #C77E4E;
+  --gold:         #C9A973;
+}
+
+[data-theme="paper"] {
+  --paper:    #F4EFE6;
+  --paper-2:  #ECE5D5;
+  --ink:      #1A1814;
+  --ink-soft: #2E2A24;
+  --ink-mute: #6B6358;
+  --rule:     #D8CFBE;
+  --accent:   #A33A2A;
+  --accent-soft: #C77E4E;
+  --gold:     #B89968;
+}
+
+[data-theme="navy"] {
+  --paper:    #0F1A2A;
+  --paper-2:  #15243A;
+  --ink:      #E8DCC4;
+  --ink-soft: #D6CFB8;
+  --ink-mute: #8A9AB0;
+  --rule:     #2A3A50;
+  --accent:   #E2A86A;
+  --accent-soft: #C77E4E;
+  --gold:     #D9B26A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Newsreader', 'Noto Serif SC', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+.lang-zh body, [data-lang="zh"] {
+  font-family: 'Noto Serif SC', 'Newsreader', Georgia, serif;
+}
+
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0.02em; }
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* ===== Top bar ===== */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  pointer-events: none;
+}
+.topbar > * { pointer-events: auto; }
+.topbar .brand { color: var(--ink); display: flex; align-items: center; gap: 12px; }
+.topbar .brand .mark {
+  display: inline-block; width: 22px; height: 22px;
+  border: 1px solid currentColor; border-radius: 50%;
+  position: relative;
+}
+.topbar .brand .mark::after {
+  content: ""; position: absolute; inset: 5px;
+  background: var(--accent); border-radius: 50%;
+}
+
+/* ===== Topbar UI controls (theme swatches + lang toggle) ===== */
+.topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.theme-swatches {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 2px;
+}
+.theme-swatches .swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  padding: 0;
+  border: 1px solid color-mix(in oklab, var(--ink) 30%, transparent);
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.theme-swatches .swatch-ink   { background: #14110C; }
+.theme-swatches .swatch-paper { background: #F4EFE6; }
+.theme-swatches .swatch-navy  { background: #2C4D80; }
+.theme-swatches .swatch:hover { transform: scale(1.15); }
+.theme-swatches .swatch.active {
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink);
+}
+
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  border: 1px solid color-mix(in oklab, var(--ink) 32%, transparent);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.lang-toggle button {
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  font-family: 'GT Sectra', 'Spectral', 'Source Han Serif SC', serif;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-mute);
+  background: transparent;
+  transition: background .15s ease, color .15s ease;
+}
+.lang-toggle button:hover { color: var(--ink); }
+.lang-toggle button.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ===== Masthead (centered title block) ===== */
+.masthead {
+  padding: 84px 56px 24px;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+.mh-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 24px;
+}
+.mh-eyebrow span.dot {
+  display: inline-block; width: 4px; height: 4px;
+  background: var(--accent); border-radius: 50%;
+  vertical-align: middle; margin: 0 12px 3px;
+}
+.mh-title {
+  font-family: 'Newsreader', serif;
+  font-weight: 400;
+  font-size: 96px;
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  font-style: italic;
+}
+.lang-zh .mh-title { font-style: normal; font-family: 'Noto Serif SC', serif; font-weight: 400; letter-spacing: 0; font-size: 88px; }
+.mh-title .ampersand { color: var(--accent); font-weight: 500; padding: 0 8px; }
+.mh-sub {
+  margin-top: 24px;
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--ink-soft);
+  max-width: 60ch;
+  margin-left: auto; margin-right: auto;
+}
+.lang-zh .mh-sub { font-style: normal; }
+
+/* ===== Filter row ===== */
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  padding: 32px 56px;
+  border-bottom: 1px solid var(--rule);
+  border-top: 1px solid var(--rule);
+  margin: 48px 56px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.filters button {
+  position: relative;
+  color: var(--ink-mute);
+  padding: 4px 0;
+  transition: color 200ms;
+}
+.filters button .count {
+  font-size: 9px;
+  vertical-align: super;
+  margin-left: 4px;
+  opacity: 0.6;
+}
+.filters button:hover { color: var(--ink); }
+.filters button.active { color: var(--ink); }
+.filters button.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
+  height: 1px; background: var(--accent);
+}
+
+/* ===== Stack of books — Stripe Press style ===== */
+.stack-wrap {
+  padding: 40px 0 140px;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.stack-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===== Book — horizontal slab (lying on its back) ===== */
+.book {
+  --bw: 720px;
+  --bg:  #7A1F1F;
+  --fg:  #F0E6D2;
+  --acc: #D9B26A;
+  width: var(--bw);
+  max-width: 92vw;
+  position: relative;
+  cursor: pointer;
+  color: var(--fg);
+  transform-style: preserve-3d;
+  transition:
+    transform 480ms cubic-bezier(.22,.84,.36,1),
+    filter   480ms cubic-bezier(.22,.84,.36,1);
+  filter:
+    drop-shadow(0 12px 14px rgba(0,0,0,0.28))
+    drop-shadow(0 4px  6px  rgba(0,0,0,0.18));
+}
+/* Hover: book lifts off the surface with a softer + larger shadow, and
+   gets a subtle pitch toward the viewer so its thickness reads. */
+.book:hover {
+  transform: translateY(-12px) perspective(2200px) rotateX(2deg);
+  filter:
+    drop-shadow(0 28px 32px rgba(0,0,0,0.34))
+    drop-shadow(0 10px 14px rgba(0,0,0,0.22));
+}
+.book:active {
+  transform: translateY(-6px) perspective(2200px) rotateX(1deg);
+  transition: transform 120ms ease;
+}
+
+/* Cover lid — book lying on its back, viewed from above-front. The slab box is
+   actually a full 720 × 480 (3:2) so the rotated portrait fits with no crop,
+   but a steep rotateX (~80°) tips it almost horizontal so the visual height
+   matches a typical lid (~92px). A negative margin pulls the spine back up to
+   sit flush against the visual lid edge, so per-book layout height stays close
+   to the original. */
+.book-cover {
+  width: 100%;
+  height: 92px;
+  background: var(--bg);
+  position: relative;
+  transform-origin: bottom center;
+  transform: perspective(1400px) rotateX(28deg);
+  transition: transform 480ms cubic-bezier(.22,.84,.36,1);
+  overflow: hidden;
+  border-radius: 3px 3px 0 0;
+}
+/* On hover the lid tips up an extra 10° so more of the cover artwork shows. */
+.book:hover .book-cover { transform: perspective(1400px) rotateX(18deg); }
+.bc-image {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.bc-image::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Pre-rotation portrait box (480×720, 2:3), holds the full cover with no crop.
+     The two-step transform projects it onto the lid: rotate(-90°) lays it on
+     its side (720×480 visual), then scaleY squashes the post-rotation height
+     down to the slab's 92px. Whole cover stays visible end-to-end, just
+     squashed vertically — like seeing the lid foreshortened. */
+  width: calc(var(--bw) * 2 / 3);     /* 480 */
+  height: var(--bw);                   /* 720 */
+  background-image: var(--cover-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: translate(-50%, -50%) scaleY(calc(92 / 480)) rotate(-90deg);
+  transform-origin: center;
+}
+.book.has-cover .book-cover::after { opacity: 0.20; }
+.book-cover::after {
+  /* cloth weave + lighting */
+  content: ""; position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg,   rgba(255,255,255,0.05) 0 1px, transparent 1px 2px),
+    repeating-linear-gradient(90deg,  rgba(0,0,0,0.06)        0 1px, transparent 1px 2px),
+    radial-gradient(160% 100% at 30% -20%, rgba(255,255,255,0.16), transparent 55%),
+    radial-gradient(160% 110% at 90% 120%, rgba(0,0,0,0.30), transparent 60%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.bc-frame {
+  position: absolute;
+  inset: 14px 32px 14px 32px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  gap: 6px 16px;
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+}
+.bc-no {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  opacity: 0.7;
+  align-self: start;
+}
+.bc-mark {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  width: 22px; height: 22px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+  opacity: 0.85;
+  justify-self: end;
+}
+.bc-mark::after {
+  content: ""; position: absolute; inset: 5px;
+  background: var(--acc); border-radius: 50%;
+}
+.bc-title {
+  grid-column: 1 / -1;
+  grid-row: 2 / 3;
+  align-self: end;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+.lang-zh .bc-title { letter-spacing: 0.02em; line-height: 1.15; font-weight: 500; }
+.bc-sub {
+  grid-column: 1 / -1;
+  grid-row: 3 / 4;
+  font-size: 11px;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  opacity: 0.78;
+  border-top: 0.5px solid currentColor;
+  padding-top: 6px;
+}
+.lang-zh .bc-sub { font-style: normal; opacity: 0.7; }
+
+/* Spine — dominant horizontal face below the cover, carries author + title.
+   Larger than the cover lid so the title leads the home stack. */
+.book-spine {
+  width: 100%;
+  height: 70px;
+  background: color-mix(in oklab, var(--bg) 90%, #000 10%);
+  color: var(--fg);
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 28px;
+  padding: 0 32px;
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+  position: relative;
+  z-index: 1;
+  border-radius: 0 0 2px 2px;
+}
+.book-spine::before {
+  /* page-edge cream sliver where cover meets spine */
+  content: ""; position: absolute;
+  top: -2px; left: 4px; right: 4px; height: 2px;
+  background: linear-gradient(90deg, transparent, #E8DCC4 8%, #E8DCC4 92%, transparent);
+  opacity: 0.55;
+}
+.book-spine::after {
+  /* cloth texture on spine */
+  content: ""; position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg,  rgba(255,255,255,0.04) 0 1px, transparent 1px 2px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.05)        0 1px, transparent 1px 2px);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.bs-author {
+  font-size: 16px;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  opacity: 0.86;
+}
+.lang-zh .bs-author { font-style: normal; }
+.bs-title {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+.lang-zh .bs-title { letter-spacing: 0.04em; font-weight: 500; font-size: 20px; }
+.bs-mark {
+  width: 20px; height: 20px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+  opacity: 0.85;
+  justify-self: end;
+}
+.bs-mark::after {
+  content: ""; position: absolute; inset: 4px;
+  background: var(--acc); border-radius: 50%;
+}
+
+/* ===== Detail / Reading View ===== */
+.detail {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, color-mix(in oklab, var(--accent, var(--ink)) 8%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 110% 110%, color-mix(in oklab, var(--accent, var(--ink)) 6%, transparent), transparent 55%),
+    var(--detailBg, var(--paper));
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  overflow-y: auto;
+}
+.detail::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  z-index: 0;
+}
+.detail-stream { position: relative; z-index: 1; }
+.detail-top-fixed { z-index: 2; }
+.vol-section {
+  border-left: 1px solid color-mix(in oklab, var(--accent, var(--ink-soft)) 30%, transparent);
+  padding-left: 24px;
+  margin-left: -24px;
+}
+.detail.open { opacity: 1; pointer-events: auto; }
+
+.detail-stream {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 56px 80px;
+}
+
+.vol-section {
+  padding: 80px 0 60px;
+  position: relative;
+}
+.vol-section + .vol-section { padding-top: 40px; }
+
+.vol-header {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding-bottom: 28px;
+  border-bottom: 0.5px solid var(--rule);
+  margin-bottom: 56px;
+}
+
+.vol-bridge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  padding: 60px 0 0;
+  margin-top: 40px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  opacity: 0.55;
+}
+.vol-bridge-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.vol-bridge-text { padding: 0 8px; }
+
+.detail-top-fixed {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 56px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  z-index: 80;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--detailBg, var(--paper)) 50%, transparent);
+}
+.detail-top-fixed .close { pointer-events: auto; }
+.detail-top-fixed .dt-meta { opacity: 0.7; }
+
+/* Right-side cluster: theme + lang + close, all pointer-active */
+.detail-top-fixed .dt-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+}
+.detail-top-fixed .dt-right .theme-swatches,
+.detail-top-fixed .dt-right .lang-toggle { pointer-events: auto; }
+
+/* Detail-page category filters — center group inside the fixed top bar */
+.dt-filters {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  pointer-events: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.dt-filters button {
+  position: relative;
+  color: var(--ink-mute);
+  padding: 4px 0;
+  transition: color 200ms ease;
+  white-space: nowrap;
+}
+.dt-filters button:hover { color: var(--ink); }
+.dt-filters button.active { color: var(--ink); }
+.dt-filters button.active::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 1px;
+  background: var(--accent);
+}
+.dt-filters .count {
+  font-size: 9px;
+  vertical-align: super;
+  margin-left: 4px;
+  opacity: 0.55;
+}
+@media (max-width: 1100px) {
+  .dt-filters { display: none; }
+}
+.detail-top-fixed .close {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--ink);
+  background: transparent;
+}
+.detail-top-fixed .close .x {
+  display: inline-block; width: 20px; height: 20px;
+  border: 1px solid var(--ink); border-radius: 50%;
+  position: relative;
+}
+.detail-top-fixed .close .x::before,
+.detail-top-fixed .close .x::after {
+  content: ""; position: absolute; left: 5px; right: 5px; top: 50%;
+  height: 1px; background: var(--ink);
+}
+.detail-top-fixed .close .x::before { transform: rotate(45deg); }
+.detail-top-fixed .close .x::after  { transform: rotate(-45deg); }
+
+.detail-spread {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.detail-left {
+  position: sticky;
+  top: 32px;
+  height: 540px;
+}
+
+/* Big standing book in detail view — Three.js WebGL canvas. The 3D mesh,
+   textures (front PNG cover + procedural spine cloth + cream pages), and
+   drag-to-rotate are all handled in the BigBook component; CSS just sizes
+   the host container and adds a soft drop shadow that appears under the
+   rendered book. */
+.big-book-3d {
+  width: 100%;
+  height: 540px;
+  position: relative;
+  filter:
+    drop-shadow(0 16px 18px rgba(0,0,0,0.30))
+    drop-shadow(28px 38px 60px rgba(0,0,0,0.45));
+}
+.big-book-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+}
+
+/* ===== Right side reading text ===== */
+.detail-right { padding-top: 8px; }
+.dr-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.dr-title {
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+  font-weight: 400;
+  font-size: 76px;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  margin-bottom: 24px;
+  text-wrap: balance;
+}
+.lang-zh .dr-title { letter-spacing: 0; line-height: 1.1; font-size: 60px; font-weight: 500; }
+.dr-author {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.lang-zh .dr-author { font-style: normal; font-family: 'Noto Serif SC', serif; }
+
+.dr-divider {
+  width: 60px; height: 1px;
+  background: var(--ink-mute);
+  margin: 28px 0 28px;
+}
+
+.dr-sub {
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  margin-bottom: 36px;
+  max-width: 36ch;
+}
+.lang-zh .dr-sub { font-style: normal; font-weight: 300; }
+
+.dr-pull {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 24px 0 26px;
+  margin: 0 0 40px;
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+  font-style: italic;
+  font-size: 26px;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+.lang-zh .dr-pull { font-style: normal; }
+
+.dr-body p {
+  font-size: 18px;
+  line-height: 1.7;
+  margin-bottom: 22px;
+  text-wrap: pretty;
+  max-width: 64ch;
+  color: var(--ink-soft);
+}
+.dr-body p:first-child::first-letter {
+  font-family: 'Newsreader', serif;
+  float: left;
+  font-size: 76px;
+  line-height: 0.85;
+  padding: 8px 12px 0 0;
+  font-weight: 500;
+  color: var(--drop, var(--accent));
+}
+.lang-zh .dr-body p:first-child::first-letter {
+  font-family: 'Noto Serif SC', serif;
+}
+
+.dr-sources {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 0.5px solid var(--rule);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink-mute);
+}
+.dr-sources-label {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 10px;
+  opacity: 0.75;
+}
+.dr-sources ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dr-sources li::before {
+  content: "—";
+  margin-right: 10px;
+  opacity: 0.5;
+}
+.dr-sources a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 0.5px solid transparent;
+  transition: color 200ms, border-color 200ms;
+}
+.dr-sources a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.dr-foot {
+  margin-top: 36px;
+  border-top: 1px solid var(--rule);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* Chapter scrub bar — vertical TOC on the left of the detail view. One row
+   per volume: a short tick line + the chapter title alongside. Active row's
+   tick gets longer + accented, and its title fades in. Stripe-Press inspired. */
+.chapter-rail {
+  position: fixed;
+  left: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;                 /* breathing room between rows */
+  align-items: flex-start;
+  opacity: 0;
+  transition: opacity 320ms ease 200ms;
+  pointer-events: none;
+  --rail-line-bg: var(--ink-soft);
+}
+.detail.open .chapter-rail { opacity: 1; pointer-events: auto; }
+.chapter-rail .ch-back {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-soft);
+  background: transparent;
+  display: grid; place-items: center;
+  font-family: serif;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: background 280ms, color 280ms;
+}
+.chapter-rail .ch-back:hover { background: var(--ink-soft); color: var(--detailBg); }
+
+/* Row height is bigger than the line itself — gives a generous click target
+   without bloating the visual rail. Title is absolutely positioned so the
+   row's height is just for hit-testing. Line stays centered via flex. */
+.rail-row {
+  position: relative;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.rail-line {
+  display: block;
+  height: 2px;
+  /* Width grows with proximity --prox in [0,1]: base + up to +44px */
+  width: calc(var(--baseW, 22px) + var(--prox, 0) * 44px);
+  background: var(--rail-line-bg);
+  border-radius: 2px;
+  /* Opacity ramps from 0.34 (cold) to 1 (right under the cursor) */
+  opacity: calc(0.34 + var(--prox, 0) * 0.66);
+  transition:
+    width 220ms cubic-bezier(.2,.8,.2,1),
+    opacity 220ms cubic-bezier(.2,.8,.2,1),
+    background 360ms;
+  flex-shrink: 0;
+}
+.rail-row.active .rail-line {
+  /* Active stays the longest + drop-colored (matches the chapter's first-letter
+     accent) regardless of cursor proximity */
+  width: calc(76px + var(--prox, 0) * 14px);
+  background: var(--drop, var(--accent));
+  opacity: 1;
+  animation: railBreath 4.2s cubic-bezier(.4,0,.6,1) infinite;
+}
+@keyframes railBreath {
+  0%, 100% { transform: scaleX(1);   filter: brightness(1); }
+  50%      { transform: scaleX(1.06); filter: brightness(1.18); }
+}
+.rail-title {
+  position: absolute;
+  left: 92px;                /* room for the longest active line + gap */
+  top: 50%;
+  transform: translate(-10px, -50%);
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 420ms cubic-bezier(.2,.8,.2,1) 60ms,
+    transform 420ms cubic-bezier(.2,.8,.2,1) 60ms;
+}
+.lang-zh .rail-title { letter-spacing: 0.04em; font-weight: 500; }
+.rail-row.active .rail-title,
+.rail-row.hover .rail-title { opacity: 1; transform: translate(0, -50%); }
+/* Hovered (non-active) titles read slightly muted so the active one keeps
+   visual primacy when both are visible at the same time. */
+.rail-row.hover:not(.active) .rail-title { opacity: 0.72; color: var(--ink-soft); }
+
+/* ===== editor's note ===== */
+.editors {
+  padding: 48px 56px 28px;
+  max-width: 72ch;
+  margin: 0 auto;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 32px;
+  align-items: baseline;
+}
+.editors-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding-top: 6px;
+}
+.editors-body {
+  margin: 0;
+  font-family: 'Newsreader', 'Noto Serif SC', serif;
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  text-align: left;
+}
+.lang-zh .editors-body { font-style: normal; }
+@media (max-width: 720px) {
+  .editors {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 40px 24px 24px;
+  }
+}
+
+/* ===== Footer / colophon ===== */
+.colophon {
+  border-top: 1px solid var(--rule);
+  padding: 40px 56px 56px;
+  margin: 80px 56px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.colophon strong { color: var(--ink); font-weight: 500; }
+.colophon .center { text-align: center; }
+.colophon .right { text-align: right; }
+
+/* ===== detail entry animation ===== */
+@keyframes textIn {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.detail.open .dr-kicker { animation: textIn 480ms cubic-bezier(.2,.8,.2,1) 80ms both; }
+.detail.open .dr-title  { animation: textIn 520ms cubic-bezier(.2,.8,.2,1) 140ms both; }
+.detail.open .dr-author { animation: textIn 520ms cubic-bezier(.2,.8,.2,1) 180ms both; }
+.detail.open .dr-sub    { animation: textIn 520ms cubic-bezier(.2,.8,.2,1) 220ms both; }
+.detail.open .dr-pull   { animation: textIn 540ms cubic-bezier(.2,.8,.2,1) 300ms both; }
+.detail.open .dr-body   { animation: textIn 560ms cubic-bezier(.2,.8,.2,1) 380ms both; }
+.detail.open .big-book-3d { animation: bookIn 700ms cubic-bezier(.2,.8,.2,1) both; }
+
+@keyframes bookIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.96); }
+  to   { opacity: 1; }
+}
+
+/* stack entry */
+@keyframes stackIn {
+  from { transform: rotateX(-12deg) rotateY(40deg) translateY(40px); opacity: 0; }
+  to   { opacity: 1; }
+}
+.stack-item .book {
+  animation: stackIn 700ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+/* hint text */
+.drag-hint {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding: 8px 0 56px;
+}
+.drag-hint .arrows { color: var(--accent); }
+
+/* small device — narrow */
+@media (max-width: 720px) {
+  .detail-spread { grid-template-columns: 1fr; gap: 40px; }
+  .detail-left { position: static; max-width: 360px; height: auto; }
+  .mh-title { font-size: 56px; }
+  .lang-zh .mh-title { font-size: 56px; }
+}
