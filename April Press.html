@@ -2,7 +2,7 @@
 <html lang="zh" data-lang="zh" data-theme="ink" class="lang-zh">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=1280" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -497,9 +497,20 @@ function BigBook({ item, lang, coverSrc }) {
 
   // Lazy-mount: only init the Three.js scene when this BigBook is near the
   // viewport, so 17 vol-sections don't all hold WebGL contexts at once.
+  // Backup: if the element is already in viewport at mount (or IO doesn't
+  // fire — happens in some embedded/iframe contexts and certain mobile
+  // emulators), set shouldMount immediately based on a getBoundingClientRect
+  // check, so the BigBook never silently fails to render.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    const checkInView = () => {
+      const r = el.getBoundingClientRect();
+      const margin = 300;
+      const inView = r.bottom > -margin && r.top < window.innerHeight + margin;
+      if (inView) setShouldMount(true);
+    };
+    checkInView();
     const io = new IntersectionObserver(
       (entries) => entries[0].isIntersecting && setShouldMount(true),
       { rootMargin: "300px 0px" }
@@ -535,17 +546,16 @@ function BigBook({ item, lang, coverSrc }) {
     const rim = new THREE.DirectionalLight(0xffffff, 0.25);
     rim.position.set(0, -2, 3); scene.add(rim);
 
-    // Textures.
-    // For the front cover we route the PNG through a regular Image+Canvas
-    // and feed THREE a CanvasTexture rather than using TextureLoader directly.
-    // Reason: file:// pages treat each PNG as cross-origin and TextureLoader's
-    // default crossOrigin='anonymous' makes WebGL refuse a CORS-tainted
-    // texture (it just renders black). Routing via canvas keeps it
-    // same-origin from WebGL's POV. Also: synchronous fallback to a painted
-    // text texture if the PNG fails to load at all (broken path / network).
-    const frontMatRef = { current: null };       // assigned below; updated when image loads
-    const frontTexInitial = makeFallbackFrontTexture(item, lang);
-    const matFront = new THREE.MeshStandardMaterial({ map: frontTexInitial, roughness: 0.78 });
+    // Front cover loading via Image + canvas. We route the PNG through a
+    // canvas before handing it to THREE so it works on both HTTP(S) and
+    // file:// — TextureLoader's default anonymous-CORS gets rejected on
+    // file:// (no CORS headers), but a plain Image element loads fine and
+    // the canvas-derived CanvasTexture is same-origin from WebGL's POV.
+    const frontMatRef = { current: null };
+    const matFront = new THREE.MeshStandardMaterial({
+      map: makeFallbackFrontTexture(item, lang),
+      roughness: 0.78,
+    });
     frontMatRef.current = matFront;
 
     if (coverSrc) {
@@ -566,15 +576,13 @@ function BigBook({ item, lang, coverSrc }) {
             frontMatRef.current.map?.dispose();
             frontMatRef.current.map = tex;
             frontMatRef.current.needsUpdate = true;
+            console.log("[cover] swapped:", coverSrc);
           }
-        } catch (_) {
-          // Canvas tainted (e.g., file:// cross-dir under strict policy)
-          // — fallback already in place, do nothing.
+        } catch (e) {
+          console.warn("[cover] canvas tainted, fallback stays:", coverSrc, e.message);
         }
       };
-      // No crossOrigin attribute — anonymous CORS would force a header check
-      // that file:// can't satisfy. Plain image loads from same-origin file://
-      // work; we then transcribe to a non-tainted canvas (best-effort).
+      img.onerror = (e) => console.error("[cover] image load failed:", coverSrc);
       img.src = coverSrc;
     }
     const spineTex = makeSpineTexture(item, lang);
