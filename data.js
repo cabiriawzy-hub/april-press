@@ -632,6 +632,44 @@ window.BRIEFING_ITEMS = [
       { label: "Modulos · Trilogue failed", url: "https://www.modulos.ai/blog/ai-act-omnibus-trilogue-failed/" },
       { label: "TheNextWeb · Apr 2026", url: "https://thenextweb.com/news/eu-ai-act-omnibus-deal-fails-april-2026-talks" }
     ]
+  },
+  {
+    id: "vol-18",
+    no: "18",
+    cat: "product",
+    title_zh: "Flipbook 把界面交给模型",
+    title_en: "Flipbook Hands the Interface to a Model",
+    sub_zh: "前 OpenAI 研究员 Zain Shah 把「网页」重写为视频模型实时生成的像素流",
+    sub_en: "Former OpenAI researcher Zain Shah rewires 'web page' into a video model's live-streamed pixels.",
+    author: "Zain Shah · Eddie Jiao · Drew O'Carr",
+    date: "April 23, 2026",
+    minutes: 5,
+    spine: { w: 70, h: 340, bg: "#2A1F5C", fg: "#EFE4F5", accent: "#D9B26A", drop: "#A8E0F0" },
+    pull_zh: "「页面不再是被渲染的 HTML，是模型每一帧画出来的画面。」",
+    pull_en: "「The page is no longer rendered HTML — it's a frame the model paints, one click at a time.」",
+    body_zh: [
+      "Zain Shah 4 月 23 日把 flipbook.page 放上线——一个不靠 HTML 的浏览器。每一个「页面」都是 AI 实时生成的图像；点屏幕任意位置，模型渲染下一张图。没有按钮、没有链接、连文字都是图像里的像素。Shah 是前 OpenAI 研究员，flipbook 是他和 Eddie Jiao、Drew O'Carr 三人离开 lab 之后的第一个公开 demo。发布当天那条 tweet 是这一期里最直接的产品定义：「Imagine every pixel on your screen, streamed live directly from a model. No HTML, no layout engine, no code.」",
+      "技术栈本身并不神秘。底层用 Lightricks 开源的 LTX Studio——一个 DiT (Diffusion Transformer) 视频生成模型——经过优化后能 1080p 24fps 通过 WebSocket 实时流到屏幕；GPU 推理由 Modal Labs 的 serverless 平台托管。模型每秒画 24 帧，用户的点击坐标送回模型作为下一帧的 conditioning，画面从那个位置继续演化。从工程视角看，它是一个「把视频生成模型当作 rendering pipeline」的赌注实验。",
+      "为什么值得单开一章——它把「内容生成」和「界面承载内容」这两件事合并了。过去两年的 AI 产品几乎都是二段式：模型生成内容（文字、图、代码），然后由一层 HTML / chat UI / IDE 把内容呈现给用户。ChatGPT 把回复包在 chat bubble 里，Cursor 把代码写进编辑器，GPT Image 2 把图片插进 React 组件里——模型负责「内容」，工程负责「承载」。Flipbook 直接砍掉了「承载」那一段：界面本身就是模型输出的画面。",
+      "现在它能力很弱——文字会糊、点击精度差、状态在多次跳转后会漂、回退到之前的「页面」基本不可能。Shah 在 thread 里说这是 prototype，主要做视觉解释，不是产品：「Today, Flipbook is limited, so we designed it around visual explanations. As the models get more accurate and more stateful, the set of things worth doing this way will expand.」赌注很清楚：随着视频模型变得更准确、状态更稳定（参见卷九 GPT Image 2 把图像生成搬进推理范式的「先想再画」），从「模型 + UI 框架」到「模型直接生成 UI」之间的距离会迅速缩短。",
+      "这跟卷八（应用层全面 agent 化）正好是镜像的两端。Agent 化的赌注是「让 chat 成为所有交互的入口」——把所有产品塞进对话窗口；Flipbook 的赌注是「chat 太低带宽，整个屏幕才是入口」——直接渲染像素。两条路在 2026 年同时跑，未来一两年的胜负看哪一条更先到达「用得动」。Cursor 3.0 选了前者，Hermes Agent 选了前者；flipbook 选了后者，OpenRouter 联创 Alex Atallah 看完产品的评价是「whole new way of interacting with AI models」。",
+      "值得自己上 flipbook.page 点一阵——比看任何写它的文章都更直观（提示：发布当周排队 2 小时，Modal 加 GPU 之后已降到几分钟）。即使最后被证明走不通——很可能——它也是 2026 年第一个把「AI-native 界面」问题摆到 demo 级别的产品。这种「砍掉中间层」的提案，AI 历史里通常会留下东西，即使提案者本人没活到下一轮。"
+    ],
+    body_en: [
+      "Zain Shah pushed flipbook.page live on April 23 — a browser without HTML. Every 'page' is an AI-generated image; click anywhere on the screen and the model paints the next one. No buttons, no links, even the text is pixels. Shah is a former OpenAI researcher; Flipbook is the first public demo from him and his co-founders Eddie Jiao and Drew O'Carr since they left lab work. The launch tweet was the cleanest product definition of the issue: 'Imagine every pixel on your screen, streamed live directly from a model. No HTML, no layout engine, no code.'",
+      "The stack itself isn't exotic. At the bottom is Lightricks's open-source LTX Studio — a DiT (Diffusion Transformer) video generation model — tuned to stream 1080p at 24 fps over WebSocket; GPU inference runs on Modal Labs's serverless platform. The model paints 24 frames a second; the user's click coordinates are fed back as conditioning for the next frame, which evolves from that point. Engineering-wise, it's a bet on using a video generation model as a rendering pipeline.",
+      "Why it deserves its own chapter: it collapses 'generating content' and 'presenting content' into a single step. Almost every AI product over the last two years has been two-stage — the model produces content (text, image, code), and a layer of HTML / chat UI / IDE presents it. ChatGPT wraps replies in chat bubbles, Cursor writes code into an editor, GPT Image 2 drops images into React components. Model handles content, engineering handles surface. Flipbook deletes the second stage: the interface itself is the model's output.",
+      "Today the capability is weak — text smudges, click precision is poor, state drifts after a few hops, going back to a previous 'page' is roughly impossible. Shah was explicit in the thread that this is prototype, not product: 'Today, Flipbook is limited, so we designed it around visual explanations. As the models get more accurate and more stateful, the set of things worth doing this way will expand.' The bet is clear: as video models get more accurate and more stateful (see Volume 9, where GPT Image 2 moved image generation inside the reasoning loop), the distance between 'model + UI framework' and 'model directly generates UI' collapses fast.",
+      "It mirrors Volume 8 (the application layer goes fully agent-shaped) from the opposite side. Agent-ification's bet is that chat becomes the universal interface — collapse every product into a dialogue window. Flipbook's bet is that chat is too low-bandwidth — the whole screen is the surface, render it directly. Both paths are running in parallel through 2026; the next year or two reveal which reaches 'usable' first. Cursor 3.0 picked the first; Hermes Agent picked the first; flipbook picked the second. OpenRouter's Alex Atallah, after using it: 'whole new way of interacting with AI models.'",
+      "It's worth opening flipbook.page and clicking around for a few minutes — more illuminating than any article about it. (Launch week saw 2-hour queues; Modal added GPUs and waits dropped to minutes.) Even if the path turns out wrong — likely — it's the first product in 2026 to put 'AI-native interface' on the table at demo grade. Proposals that 'cut out the middle layer' tend to leave something behind in AI's history, even when the proposers don't make it to the next round."
+    ],
+    sources: [
+      { label: "Flipbook · flipbook.page", url: "https://flipbook.page/" },
+      { label: "Zain Shah · launch thread (Apr 23)", url: "https://x.com/zan2434/status/2046982383430496444" },
+      { label: "Eddie Jiao · visual style iterations", url: "https://x.com/eddiejiao_obj/status/2047373400889606595" },
+      { label: "Modal Labs sponsorship update", url: "https://x.com/zan2434/status/2047748600143437921" },
+      { label: "LTX Studio (Lightricks open-source)", url: "https://github.com/Lightricks/LTX-Video" }
+    ]
   }
 ];
 
