@@ -437,32 +437,36 @@ window.BRIEFING_ITEMS = [
     sub_en: "Smarter than 5.4, fewer tokens — same price",
     author: "OpenAI",
     date: "April 23, 2026",
-    minutes: 5,
+    minutes: 7,
     spine: { w: 88, h: 370, bg: "#1A3A3A", fg: "#E8DCC4", accent: "#D9B26A", drop: "#DDB060" },
     pull_zh: "「OpenAI 这一轮，发布频率已经超过了公告间距。」",
     pull_en: "「OpenAI's release cadence has compressed faster than its press calendar.」",
     body_zh: [
-      "GPT-5.5 与 GPT-5.5 Pro 在 4 月 23 日同日上线——主打「同样延迟下更强、且每个任务消耗更少 token」。先在 ChatGPT 与 Codex 推送给付费用户，次日开放 API。",
-      "价格与 5.4 持平：5 美元 / 百万输入 token、30 美元 / 百万输出 token，1M 上下文窗口；Pro 版分别为 30 / 180 美元。",
-      "距上一代 GPT-5.4 只有几周——节奏的压缩比模型本身的进步更值得记录。一个版本周期从「按季度」变成「按周」时，产品决策与采购合同要面对的不确定性也跟着量级跃迁。",
+      "GPT-5.5 与 GPT-5.5 Pro 在 4 月 23 日同日上线——主打「同样延迟下更强、且每个任务消耗更少 token」。先在 ChatGPT 与 Codex 推送给付费用户，次日开放 API。距上一代 GPT-5.4 只有几周。",
+      "价格与 5.4 持平：5 美元 / 百万输入 token、30 美元 / 百万输出 token，1M 上下文窗口；Pro 版分别为 30 / 180 美元。Anthropic Opus 4.7（卷七）也是「价格不变、模型更聪明」的同一动作——这是 2026 年前沿模型版本号微调的默认套路。",
+      "公开基准 OpenAI 这次给得齐：Terminal-Bench 2.0 82.7%、FrontierMath 1-3 51.7% / 4 35.4%、GPQA Diamond 93.6%、OSWorld-Verified 78.7%。报告把 5.5 与 Opus 4.7、Gemini 3.1 Pro 放在同一张表里——三家头部模型在公开基准上正面对比的频率，这一年明显高于过去两年。",
+      "节奏的压缩比模型本身的进步更值得记录。一个版本周期从「按季度」变成「按周」时，产品决策与采购合同要面对的不确定性也跟着量级跃迁。「我们用哪一版」过去是年度 review 的话题，2026 年开始变成季度甚至月度话题。",
       "「同样延迟、更省 token」这件事的工程含义在于推理路径的内部优化。OpenAI 没有公开 5.5 vs 5.4 的具体架构差异，但官方 release notes 暗示了「图文 reasoning 路径在底层共享」——这条路径上的优化对 GPT Image 2（卷九）和 5.5 同时受益。也就是说，OpenAI 这个月在两条不同产品线上同时押 reasoning，背后其实是一份共享的底层投入。",
-      "GPT-5.5 同时在 4 月底登陆 AWS Bedrock，与 Anthropic Opus 4.7（卷七）的「同日上 Bedrock / Vertex / Foundry」形成镜像。「云独占」这个商业模式正式进入终结阶段——前沿模型上每一家云就像传统 SaaS 厂商上每一家云一样自然。",
+      "GPT-5.5 在 4 月 28 日登陆 AWS Bedrock——正好是 Microsoft 与 OpenAI 独占协议失效的第二天。和 Anthropic Opus 4.7（卷七）的「同日上 Bedrock / Vertex / Foundry」形成镜像。「云独占」这个商业模式正式进入终结阶段——前沿模型上每一家云就像传统 SaaS 厂商上每一家云一样自然。",
       "对采购方的实际影响：模型预算的 unit economics 在过去 12 个月已经从「按 token 算」转向「按任务算」。GPT-5.5 主打的「同样延迟下更强、且每个任务消耗更少 token」直接说的就是这件事——不是单价低，而是每完成一个任务的总成本低。",
       "GPT-5.5 与 Opus 4.7（卷七）、GPT Image 2（卷九）一起构成本期「三周三连发」的最后一发。三件事并排看，2026 年前沿模型的发布逻辑就清晰了——按周、同价、上每一家云、reasoning 化。"
     ],
     body_en: [
-      "On April 23, OpenAI launched GPT-5.5 and GPT-5.5 Pro — pitched on 'higher intelligence at the same latency, and fewer tokens per task.' The model rolled out to paid ChatGPT and Codex tiers first, with API access the next day.",
-      "Pricing matches 5.4: $5 per million input tokens, $30 per million output, 1M context. The Pro variant runs $30 / $180.",
-      "It's only weeks since GPT-5.4 — the cadence compression is more notable than the model itself. When a version cycle moves from 'quarters' to 'weeks,' the uncertainty surface for product decisions and procurement contracts jumps an order of magnitude with it.",
+      "On April 23, OpenAI launched GPT-5.5 and GPT-5.5 Pro — pitched on 'higher intelligence at the same latency, and fewer tokens per task.' The model rolled out to paid ChatGPT and Codex tiers first, with API access the next day. Only weeks since GPT-5.4.",
+      "Pricing matches 5.4: $5 per million input tokens, $30 per million output, 1M context. The Pro variant runs $30 / $180. Anthropic's Opus 4.7 (Volume 7) plays the same 'same price, smarter model' move — this is the default version-bump pattern for 2026's frontier releases.",
+      "Public benchmarks are unusually complete this time: Terminal-Bench 2.0 at 82.7%, FrontierMath 1-3 at 51.7% / level-4 at 35.4%, GPQA Diamond at 93.6%, OSWorld-Verified at 78.7%. The release notes put 5.5 in a side-by-side table with Opus 4.7 and Gemini 3.1 Pro — direct head-to-head benchmark comparison among top-three labs is markedly more frequent in this cycle than the last two years.",
+      "The cadence compression is more notable than the model itself. When a version cycle moves from 'quarters' to 'weeks,' the uncertainty surface for product decisions and procurement contracts jumps an order of magnitude with it. 'Which version are we on' was once an annual review question; in 2026 it becomes quarterly, then monthly.",
       "'Same latency, fewer tokens' is engineering language for internal reasoning-path optimization. OpenAI didn't publish 5.4-vs-5.5 architectural diffs, but the release notes hint that 'image-text reasoning paths share at the foundation level' — meaning optimization here benefits GPT Image 2 (Volume 9) and 5.5 simultaneously. The two-product-line bet on reasoning this month rests on a shared substrate.",
-      "GPT-5.5 also landed on AWS Bedrock late April, mirroring Anthropic's Opus 4.7 (Volume 7) 'same-day on Bedrock / Vertex / Foundry' move. The 'cloud exclusivity' commercial pattern enters its endgame — frontier models on every cloud is becoming as natural as traditional SaaS on every cloud.",
+      "GPT-5.5 landed on AWS Bedrock on April 28 — the day after Microsoft's exclusivity deal with OpenAI ended. Mirroring Anthropic's Opus 4.7 (Volume 7) 'same-day on Bedrock / Vertex / Foundry' move. The 'cloud exclusivity' commercial pattern enters its endgame — frontier models on every cloud is becoming as natural as traditional SaaS on every cloud.",
       "For buyers, the practical shift: model budget unit economics moved over the past 12 months from 'per token' to 'per task.' GPT-5.5's headline of 'higher quality at same latency, fewer tokens per task' speaks to this directly — not cheaper unit price, but cheaper task completion.",
       "With Volume 7 (Opus 4.7) and Volume 9 (GPT Image 2), GPT-5.5 forms the third entry in this issue's 'three frontier models in three weeks.' Read together, the 2026 release logic comes into focus: weekly cadence, price held, every cloud, reasoning-folded."
     ],
     sources: [
       { label: "OpenAI · GPT-5.5", url: "https://openai.com/index/introducing-gpt-5-5/" },
-      { label: "TechCrunch · Apr 23", url: "https://techcrunch.com/2026/04/23/openai-chatgpt-gpt-5-5-ai-model-superapp/" },
-      { label: "Fortune · Apr 23", url: "https://fortune.com/2026/04/23/openai-releases-gpt-5-5/" }
+      { label: "TechCrunch · super app step", url: "https://techcrunch.com/2026/04/23/openai-chatgpt-gpt-5-5-ai-model-superapp/" },
+      { label: "OpenAI · GPT-5.5 system card", url: "https://deploymentsafety.openai.com/gpt-5-5" },
+      { label: "Vellum · benchmarks breakdown", url: "https://www.vellum.ai/blog/everything-you-need-to-know-about-gpt-5-5" },
+      { label: "Lushbinary · Bedrock arrival Apr 28", url: "https://lushbinary.com/blog/openai-models-aws-bedrock-gpt-5-codex-agents-guide/" }
     ]
   },
   {
@@ -475,29 +479,36 @@ window.BRIEFING_ITEMS = [
     sub_en: "Cross-data-center bandwidth, cut by ~200×",
     author: "Arthur Douillard et al. · DeepMind",
     date: "April 23, 2026",
-    minutes: 7,
+    minutes: 8,
     spine: { w: 56, h: 310, bg: "#2A2A4A", fg: "#E6E1D6", accent: "#B89968", drop: "#B8A0DC" },
     pull_zh: "「不是省电，是给「在多个数据中心训练」一个可行的工程图纸。」",
     pull_en: "「Not a power-saving trick — a working blueprint for training across data centers.」",
     body_zh: [
-      "DeepMind 的 Arthur Douillard 团队在 4 月 23 日发表 Decoupled DiLoCo——一种异步分布式训练架构，把跨数据中心带宽需求从 198 Gbps 降到 0.84 Gbps，且在整组学习单元下线时仍能维持 88% goodput。",
-      "这些数字不只是为了好看。它让「在多个数据中心同时训练一个 frontier 模型」从一句口号变成一个具体可行的工程问题。198 Gbps 是单一物理位置专网的成本量级，0.84 Gbps 是消费级宽带都能跑的量级——两者之间隔的是「能不能跨城跨洲组训练集群」的可能性。",
-      "DiLoCo 这个名字本身指的是 Distributed Low-Communication 训练——DeepMind 这个方向已经做了将近三年。Decoupled DiLoCo 的「decoupled」在两点：一是把数据并行与模型并行的同步频率解耦，二是允许不同数据中心的更新以异步方式回流。前一点降低 latency 敏感性，后一点让「某个数据中心整组下线」不再是训练失败。",
+      "DeepMind 的 Arthur Douillard 团队在 4 月 23 日发表 Decoupled DiLoCo——一种异步分布式训练架构。它建立在 DeepMind 之前两个工作之上：Pathways（异步数据流的分布式 AI 系统）和 DiLoCo（Distributed Low-Communication，过去三年里大幅降低跨数据中心带宽要求的方向）。「decoupled」是这一代的关键词。",
+      "「decoupled」分两层。一是把数据并行与模型并行的同步频率解耦，让不同数据中心可以按自己的节奏更新；二是允许异步通信——每个 learner 把参数片段送到中央同步器，同步器用 minimum quorum、adaptive grace window、动态 token 加权合并这三种机制处理来不及到的更新，绕开掉线或卡顿的 learner。",
+      "最值得记的数字来自 chaos engineering 测试：在模拟高硬件故障率的场景下，Decoupled DiLoCo 维持 88% goodput，而传统 Data-Parallel 训练只有 27%。这不是省电的优化，是给「在多个数据中心训练 frontier 模型」一份可行的工程图纸。换句话说，硬件故障从「拖慢训练」变成「绕开就好」。",
+      "测试用的是 Gemma 4 量级的模型。论文同时确认：在硬件失败时，Decoupled DiLoCo 学习集群的可用性高于传统方法，最终 ML 性能与基线持平——这是核心论点：不是为了省钱，是为了让大型训练在面对真实硬件不可靠性时仍能完成。",
       "业界把这篇论文当作 Gemma 4 量级训练运行的隐性前置——不是替代算力，而是支撑算力。Google 这个月可以同时开源 Gemma 4 + 给 Anthropic 投 400 亿（卷十三）TPU 算力，背后是它在跨数据中心训练上有别人没有的工程红利。这篇论文是这份红利的一份公开证明。",
-      "对小公司也有意义。一个未被广泛讨论的 implication：如果跨数据中心带宽需求降到 1 Gbps 以下，「自己拼训练集群」对中型实验室来说从「不可能」变成「值得评估」。OpenClaw 团队在论文发布两周后已经发了一个 Pi-cluster 复现实验。",
-      "Decoupled DiLoCo 是本期最「往里看」的一篇——讲的不是模型能做什么，而是模型怎么被训出来。读它需要忍受 12 页公式与 6 张图表，但读完之后，关于「2026 年下半年谁能训出 frontier 模型」的判断会变得清楚得多。"
+      "对小公司也有意义。一个未被广泛讨论的 implication：当跨数据中心带宽要求大幅降低、硬件故障容忍度大幅提高，「自己拼训练集群」对中型实验室来说从「不可能」变成「值得评估」。Prime Intellect 的 OpenDiLoCo（开源版前作）已经在生态里做这件事；Decoupled DiLoCo 让这条路线更可信。",
+      "争议在于可复现性。论文目前以 Google 内部基础设施为前提——Pathways + 私有调度器 + 私有 TPU 拓扑。社区里有声音质疑：核心结论是否依赖这些前置条件？这个问题论文没有正面回答，要等开源社区给出独立复现。",
+      "Decoupled DiLoCo 是本期最「往里看」的一篇——讲的不是模型能做什么，而是模型怎么被训出来。读它需要忍受十几页公式与若干图表，但读完之后，关于「2026 年下半年谁能训出 frontier 模型」的判断会变得清楚得多。"
     ],
     body_en: [
-      "On April 23, Arthur Douillard's group at DeepMind published Decoupled DiLoCo — an asynchronous distributed-training architecture that drops cross-DC bandwidth from 198 Gbps to 0.84 Gbps and still hits 88% goodput while tolerating the loss of entire learner units.",
-      "Those numbers aren't decoration. They turn 'training a frontier model across multiple data centers' from a slogan into a concrete, tractable engineering problem. 198 Gbps is single-site dedicated-fiber territory; 0.84 Gbps is consumer-grade broadband. Between them sits the possibility of training across cities and continents.",
-      "DiLoCo means Distributed Low-Communication training — a direction DeepMind has worked on for nearly three years. The 'decoupled' twist is two-part: decoupling data-parallel from model-parallel sync frequencies, and allowing updates from different DCs to flow back asynchronously. The first reduces latency sensitivity; the second means 'a whole DC going offline' no longer means training failure.",
+      "On April 23, Arthur Douillard's group at DeepMind published Decoupled DiLoCo — an asynchronous distributed-training architecture. It builds on two earlier DeepMind directions: Pathways (asynchronous-dataflow distributed AI) and DiLoCo (Distributed Low-Communication, the multi-year program reducing cross-DC bandwidth requirements). 'Decoupled' is this generation's keyword.",
+      "Two layers of decoupling. First, decoupling data-parallel from model-parallel sync frequencies so different DCs can update at their own cadence. Second, asynchronous communication — each learner sends parameter fragments to a central synchronizer, which handles late updates via minimum quorum, an adaptive grace window, and dynamic token-weighted merging, routing around dropped or straggling learners.",
+      "The number worth recording comes from chaos engineering: under simulated high hardware failure, Decoupled DiLoCo holds 88% goodput while standard Data-Parallel training drops to 27%. Not a power-saving trick — a working blueprint for training frontier models across multiple data centers. Hardware failure stops being 'the run slows down' and becomes 'route around it.'",
+      "Tests ran on Gemma-4-class models. The paper confirms: under hardware failure, Decoupled DiLoCo keeps higher learner-cluster availability than standard methods while ultimately matching baseline ML performance — the core claim isn't cost-saving, it's making large runs survive realistic hardware unreliability.",
       "Industry readers immediately framed the paper as the implicit prerequisite for Gemma-4-class runs — not a replacement for compute scaling, but the scaffold underneath it. Google can open-source Gemma 4 and pour $40B in TPU compute into Anthropic (Volume 13) in the same month because cross-DC training carries an engineering surplus competitors don't yet have. This paper is a public proof of that surplus.",
-      "It also matters for smaller labs. One under-discussed implication: if cross-DC bandwidth needs drop below 1 Gbps, 'roll your own training cluster' moves from 'impossible' to 'worth evaluating' for mid-sized labs. The OpenClaw team posted a Pi-cluster reproduction experiment two weeks after the paper.",
-      "Decoupled DiLoCo is the most inward-looking piece in this issue — not what a model can do, but how a model gets trained. It demands 12 pages of equations and 6 figures of patience, but after reading, the question 'who can train a frontier model in H2 2026' gets dramatically clearer."
+      "It also matters for smaller labs. One under-discussed implication: as cross-DC bandwidth needs drop and hardware-failure tolerance rises, 'roll your own training cluster' moves from 'impossible' to 'worth evaluating' for mid-sized labs. Prime Intellect's OpenDiLoCo (open-source predecessor) is already moving in this direction; Decoupled DiLoCo makes the lineage more credible.",
+      "The dispute is reproducibility. The paper presupposes Google's internal infrastructure — Pathways + private schedulers + private TPU topology. Some in the community ask whether the core results depend on those prerequisites. The paper doesn't answer directly; awaiting independent replication from open-source labs.",
+      "Decoupled DiLoCo is the most inward-looking piece in this issue — not what a model can do, but how a model gets trained. It demands a dozen pages of equations and figures of patience, but after reading, the question 'who can train a frontier model in H2 2026' gets dramatically clearer."
     ],
     sources: [
+      { label: "DeepMind blog · Decoupled DiLoCo", url: "https://deepmind.google/blog/decoupled-diloco/" },
       { label: "arxiv:2604.21428", url: "https://arxiv.org/abs/2604.21428" },
-      { label: "DeepMind blog", url: "https://deepmind.google/blog/decoupled-diloco/" }
+      { label: "MarkTechPost · 88% goodput analysis", url: "https://www.marktechpost.com/2026/04/23/google-deepmind-introduces-decoupled-diloco-an-asynchronous-training-architecture-achieving-88-goodput-under-high-hardware-failure-rates/" },
+      { label: "Prime Intellect · OpenDiLoCo predecessor", url: "https://www.primeintellect.ai/blog/opendiloco" },
+      { label: "The Rift · resilient multi-DC training", url: "https://www.therift.ai/news-feed/google-deepmind-launches-decoupled-diloco-for-resilient-multi-data-center-ai-training" }
     ]
   },
   {
@@ -510,31 +521,36 @@ window.BRIEFING_ITEMS = [
     sub_en: "Google deepens Anthropic; valuation lands at $350B",
     author: "Google · Anthropic",
     date: "April 24, 2026",
-    minutes: 5,
+    minutes: 6,
     spine: { w: 88, h: 380, bg: "#5C3A1F", fg: "#EFE4CC", accent: "#D9B26A", drop: "#F0DCB8" },
     pull_zh: "「不是对一家模型公司的注资，是对一份云策略的下注。」",
     pull_en: "「Not an investment in a model company. A bet on a cloud strategy.」",
     body_zh: [
-      "Bloomberg 在 4 月 24 日披露：Google 计划向 Anthropic 投入最多 400 亿美元——100 亿先到、估值 3500 亿；剩余 300 亿与业绩目标挂钩。",
-      "金额是表面，更深的是结构。这一笔几乎全部以 TPU 算力的形式释放——Google 用云端算力支付，Anthropic 用模型成绩兑现承诺。这不是一次股权投资，更接近一份「七年期算力期权 + 估值锚」的组合协议。",
-      "为什么这种结构？两个原因。一是双方都有充分的不愿付现金的理由——Google 的资本支出已经处于历史峰值；Anthropic 不愿被当作单一融资轮看待。二是 TPU 算力本身正在变成新一代的「战略资产」——它和 Nvidia 的 H/B 系列形成实质性的供应链替代关系，每一份大额 TPU 承诺都改变市场对未来 18 个月算力供给的预期。",
-      "几天后 OpenAI 模型上 AWS Bedrock 的消息又改写了云图景。两件事放在同一周读，能看出 2026 年「云 + 模型」联盟版图被强行挪动的痕迹：Anthropic 加深与 Google 绑定，OpenAI 反向松动 Microsoft 独占——双方在向对方的盟友市场打开口子。",
+      "Bloomberg 在 4 月 24 日披露：Google 计划向 Anthropic 投入最多 400 亿美元——100 亿先到、估值 3500 亿；剩余 300 亿与业绩目标挂钩。Google 同时承诺未来 5 年内提供 5 GW 的 TPU 算力。",
+      "金额是表面，更深的是结构。这一笔几乎全部以 TPU 算力的形式释放——Google 用云端算力支付，Anthropic 用模型成绩兑现承诺。这不是一次普通股权投资，更接近一份「七年期算力期权 + 估值锚」的组合协议。",
+      "为什么这种结构？两个原因。一是双方都有充分的不愿付现金的理由——Google 资本支出已处于历史峰值；Anthropic 不愿被当作单一融资轮看待。二是 TPU 算力本身正在变成新一代的「战略资产」——它和 Nvidia H/B 系列形成实质性的供应链替代关系，每一份大额 TPU 承诺都改变市场对未来 18 个月算力供给的预期。",
+      "几天前 Amazon 把对 Anthropic 的投入扩大到 250 亿美元；两件事放在一起，Anthropic 这一个月内接到了约 650 亿美元的股权承诺、外加约 10 GW 的算力预订——一家公司同时绑定了两家最大的云。这个量级的同步绑定在 2025 年都没有先例。",
+      "几天后 OpenAI 模型上 AWS Bedrock 的消息又改写了云图景。两件事放在同一周读，能看出 2026 年「云 + 模型」联盟版图被强行挪动的痕迹：Anthropic 加深与 Google + Amazon 双绑定，OpenAI 反向松动 Microsoft 独占——双方在向对方的盟友市场打开口子。",
       "对应用层来说，这件事直接影响采购合同的语言。过去两年里「我们用 Claude」常常意味着「跑在 AWS 上」；接下来「跑在 Google Cloud 上的 Claude」会成为越来越多企业合同的默认条款。同样地，「跑在 AWS 上的 GPT」也开始变成可被签的合同。",
       "估值这一面也值得读。3500 亿的 Anthropic 在四月底已经是全球估值前五的私营公司之一——但因为这一笔七年期算力承诺的存在，「3500 亿」严格意义上不是一份现金估值，而是「Google 愿意用多少 TPU 来赌 Anthropic 的下一个版本」的一种货币化表达。",
       "和卷十六（OpenAI 在收窄）合起来看，是本期最值得对比的一组：同月，一家被深度绑定，一家在解绑。各自的解读独立，合起来是 2026 年「实验室 + 云」关系网正在被重新切分。"
     ],
     body_en: [
-      "On April 24, Bloomberg reported Google plans to invest up to $40B in Anthropic — $10B now at a $350B valuation, the remaining $30B tied to performance milestones.",
+      "On April 24, Bloomberg reported Google plans to invest up to $40B in Anthropic — $10B now at a $350B valuation, the remaining $30B tied to performance milestones. Google also commits 5 GW of TPU capacity over the next five years.",
       "The number is the surface. The structure is the story: nearly all of it is released as TPU compute — Google paying in cloud, Anthropic redeeming in model progress. This is not equity investment so much as 'a seven-year compute option plus valuation anchor.'",
       "Why this structure? Two reasons. First, both sides have reasons not to want to move cash — Google's capex is at historic highs, Anthropic doesn't want to be priced as a single round. Second, TPU compute is becoming the new generation of 'strategic asset' — it functionally substitutes Nvidia's H/B-series in the supply chain, and every large TPU commitment shifts the market's expectation of compute supply over the next 18 months.",
-      "Days later OpenAI's models shipped on AWS Bedrock. Read alongside, the two events have the smell of the 2026 cloud-and-model alliance map being physically shoved around: Anthropic deepens its tether to Google; OpenAI loosens its Microsoft exclusivity. Each side opens an aperture into the other's home cloud market.",
+      "Days earlier, Amazon expanded its commitment to Anthropic to $25B. Combined: Anthropic took on roughly $65B in equity commitments and ~10 GW of reserved compute in a single month — one company simultaneously tethered to the two largest clouds. No precedent of this scale in 2025.",
+      "Days later OpenAI's models shipped on AWS Bedrock. Read alongside, the two events have the smell of the 2026 cloud-and-model alliance map being physically shoved around: Anthropic deepens its dual tether to Google + Amazon; OpenAI loosens its Microsoft exclusivity. Each side opens an aperture into the other's home cloud market.",
       "For the application layer, this directly changes procurement contract language. For two years 'we use Claude' usually meant 'running on AWS.' 'Claude on Google Cloud' is about to become a default clause in more enterprise contracts. Symmetrically, 'GPT on AWS' becomes a signable contract too.",
       "The valuation side is worth reading on its own. $350B places Anthropic in the global top five private company valuations as of late April — but because this is a seven-year compute commitment, '$350B' isn't strictly a cash valuation. It's 'how many TPUs Google is willing to commit to bet on Anthropic's next version,' translated into dollars.",
       "Read with Volume 16 (OpenAI Narrows), this is the issue's most worth-comparing pair: in the same month, one lab gets deeply tethered and one starts unlatching. The two readings stand independently. Together they map the 2026 lab-cloud relationship being recut."
     ],
     sources: [
-      { label: "Bloomberg · Apr 24", url: "https://www.bloomberg.com/news/articles/2026-04-24/google-plans-to-invest-up-to-40-billion-in-anthropic" },
-      { label: "TechCrunch · Apr 24", url: "https://techcrunch.com/2026/04/24/google-to-invest-up-to-40b-in-anthropic-in-cash-and-compute/" }
+      { label: "Bloomberg · Google plans $40B in Anthropic", url: "https://www.bloomberg.com/news/articles/2026-04-24/google-plans-to-invest-up-to-40-billion-in-anthropic" },
+      { label: "TechCrunch · cash and compute deal", url: "https://techcrunch.com/2026/04/24/google-to-invest-up-to-40b-in-anthropic-in-cash-and-compute/" },
+      { label: "CNBC · search giant spreads its AI bets", url: "https://www.cnbc.com/2026/04/24/google-to-invest-up-to-40-billion-in-anthropic-as-search-giant-spreads-its-ai-bets.html" },
+      { label: "PYMNTS · Google doubles down on Anthropic", url: "https://www.pymnts.com/news/investment-tracker/2026/google-doubles-down-on-anthropic-with-new-40-billion-investment/" },
+      { label: "The Motley Fool · valuation read", url: "https://www.fool.com/investing/2026/04/27/google-screaming-bargain-anthropic-investment/" }
     ]
   },
   {
