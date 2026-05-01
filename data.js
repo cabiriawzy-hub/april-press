@@ -182,30 +182,36 @@ window.BRIEFING_ITEMS = [
     sub_en: "The YC president open-sources his AI long-term memory",
     author: "Garry Tan",
     date: "April 10, 2026",
-    minutes: 6,
+    minutes: 7,
     spine: { w: 64, h: 330, bg: "#4A3F2A", fg: "#EFE4CC", accent: "#D9B26A", drop: "#E8C474" },
     pull_zh: "「最让人着迷的不是技术，是一个掌门人愿意把自己 17,888 页的认知曝在 GitHub 上。」",
     pull_en: "「The fascinating part isn't the tech — it's a CEO willing to expose 17,888 pages of his cognition on GitHub.」",
     body_zh: [
-      "Y Combinator 总裁 Garry Tan 在 4 月 10 日把 GBrain 开源——MIT 协议，24 小时内 5,400+ stars。这是 Karpathy LLM Wiki 之后第一个被广泛讨论的实现版本。",
-      "GBrain 是 Postgres + pgvector + 一万多份 markdown 的混合体。每一页是「编译过的真值 + 时间线」结构：先一段汇总，下面是按时间累积的细节。它有 dream cycles——夜间运行的自动整理任务，让模型在主人睡觉时把当天新增信息消化进知识图谱。",
-      "它最让人着迷的不是技术。GBrain 的样本仓库是 Tan 自己的 brain：17,888 页、4,383 个人物档案、723 家公司、21 个夜间自动 cron job。这是一个现役 CEO 把自己怎么管理人脉、做投资判断、消化阅读的全过程，毫无保留地放在公网上。这种姿态本身比 GBrain 是不是技术上「最好」更值得讨论。",
-      "独立代码审计随之到来。一份在 GitHub Issues 里被广泛传播的审计指出，dream cycles、entity detection、compiled-truth rewriting 这些「卖点」当前更多是 markdown 指令文档而非真实可执行代码——也就是说，许多动作仍然是模型读到一段「请你做 X」的 markdown，然后自己解释执行。GBrain 的拥护者认为这正是 LLM Wiki 的精髓：让模型自己用文档把自己组织起来。批评者认为这是混淆「软件」与「prompt」。",
-      "争议本身印证了关注度。GBrain 在四月里催生了下游一整套 agent harness 实践——Hermes Agent、OpenClaw、Paperclip 各自把它当作设计参考点。它和 Karpathy LLM Wiki（卷二）、Mitchell Hashimoto 的 Agent = Model + Harness（卷六）一起构成本期的 harness 家族。",
-      "GBrain 把一个抽象的「让 LLM 自维护知识库」概念落到了一个可下载的具体仓库里。你不会照搬 Tan 的 17,888 页，但你下次写 personal AI 工具时，会忍不住先读它的目录结构。"
+      "Y Combinator 总裁 Garry Tan 4 月 10 日把 GBrain 开源——MIT 协议，24 小时内 5,400+ stars，X 上覆盖到 150 万人。这是 Karpathy LLM Wiki（卷二）之后第一个被广泛讨论的实现版本，也是把「让 LLM 自维护知识库」从概念变成可下载仓库的关键样本。",
+      "GBrain 不是单纯的 markdown 库，是 markdown + Postgres + pgvector + Reciprocal Rank Fusion 的混合体。每一页是「编译过的真值 + 时间线」结构：先一段汇总（compiled truth），下面是按时间累积的细节。它有 dream cycles——夜间运行的自动整理任务，让模型在主人睡觉时把当天信息消化进知识图谱。Tan 自己原话：早晨醒来「the brain is smarter than when I went to sleep」。",
+      "它最让人着迷的不是技术。GBrain 的样本仓库是 Tan 自己的 brain：10,000+ 页 markdown、3,000+ 人物档案、280+ 会议转录、300+ 思考记录、13 年的日历数据、40+ 技能模块、20+ 个夜间 cron。一个现役 CEO 把自己怎么管理人脉、做投资判断、消化阅读的全过程毫无保留地放在公网上。这种姿态比 GBrain 是不是技术上「最好」更值得讨论。",
+      "独立审计随之到来。Penfield Labs 在 dev.to 发了一篇代码审计长文，结论很硬：「All three features are markdown documents that instruct an AI agent what to do. The codebase itself contained no rewrite logic, no scheduling, no entity detection.」也就是说，dream cycles、entity detection、compiled-truth rewriting 这三个被宣传的核心特性，当前都是 markdown 指令文档而非可执行代码。",
+      "代码里真正实现的是三件事：PostgreSQL + pgvector 存储、Reciprocal Rank Fusion 做的混合检索、一条 chunking pipeline。这三件本身是扎实工程组件——但 MCP server 部分被审计指出「ships broken」，存在 race conditions、NULL embedding overwrites、S3 后端「not production-ready」等明确 bug。",
+      "争议本身印证了关注度。GBrain 拥护者认为「markdown 指令也算实现」正是 LLM Wiki 的精髓——让模型自己用文档把自己组织起来；批评者认为这是混淆「软件」与「prompt」。这一争论一周内催生了下游一整套 agent harness 实践：Hermes Agent、OpenClaw、Paperclip 各自把它当作设计参考点。",
+      "附带争议是 Tan 之前公开 endorse 的 MemPalace。同一份审计指出 MemPalace 把 Recall@5 检索分数当端到端 QA 准确率上报；独立开发者跑真实 QA 测试时，分数从声称的 96.6% 大幅下跌。这件事不是 GBrain 本身的问题，但解释了为什么社区对 GBrain 的代码同样跑了一次审计——AI 工具的可信度今年开始被外部独立检查。",
+      "它和 Karpathy LLM Wiki（卷二）、Mitchell Hashimoto 的 Agent = Model + Harness（卷六）一起构成本期的 harness 家族。GBrain 把抽象概念落到了一个可下载的具体仓库里——你不会照搬 Tan 的 10,000 页，但你下次写 personal AI 工具时，会忍不住先读它的目录结构。"
     ],
     body_en: [
-      "On April 10, Y Combinator president Garry Tan open-sourced GBrain — MIT-licensed; 5,400+ stars in 24 hours. It's the first widely-discussed implementation after Karpathy's LLM Wiki.",
-      "GBrain is a hybrid: Postgres + pgvector + thousands of markdown files. Each page follows a 'compiled truth + timeline' pattern: a summary on top, chronological entries below. It has dream cycles — overnight tasks that consolidate the day's new information into the knowledge graph while the user sleeps.",
-      "The most striking part isn't the tech. GBrain's reference repo is Tan's own brain: 17,888 pages, 4,383 people-files, 723 companies, 21 overnight cron jobs. A sitting CEO putting how he manages relationships, makes investment judgments, and metabolizes reading — fully public on GitHub. The gesture itself is more interesting than whether GBrain is the 'best' technical implementation.",
-      "An independent audit followed. A widely-circulated GitHub Issue argued that the marquee features — dream cycles, entity detection, compiled-truth rewriting — are largely markdown instruction documents rather than executable code. That is, many actions remain 'the model reads a markdown that says please do X, then interprets it.' Supporters see this as the spirit of LLM Wiki: let the model use docs to organize itself. Critics see it as conflating 'software' with 'prompts.'",
-      "The controversy itself proved the gravity. GBrain seeded a downstream wave of agent-harness practice through April — Hermes Agent, OpenClaw, and Paperclip each cite it as design reference. Together with Karpathy's LLM Wiki (Volume 2) and Hashimoto's Agent = Model + Harness (Volume 6), it forms the issue's harness family.",
-      "GBrain grounded an abstract concept ('let an LLM maintain its own knowledge base') into a downloadable concrete repo. You won't copy Tan's 17,888 pages. You will, the next time you build a personal AI tool, find yourself reading its folder structure first."
+      "On April 10, Y Combinator president Garry Tan open-sourced GBrain — MIT-licensed; 5,400+ GitHub stars in 24 hours, reach of 1.5M on X. It's the first widely-discussed implementation after Karpathy's LLM Wiki (Volume 2), and the key example that turned 'let an LLM maintain its own knowledge base' from concept into downloadable repo.",
+      "GBrain is not just a markdown library — it's markdown + Postgres + pgvector + Reciprocal Rank Fusion. Each page follows a 'compiled truth + timeline' pattern: a summary (compiled truth) on top, chronological entries below. It has dream cycles — overnight tasks that consolidate the day's new information while the user sleeps. Tan's own line: 'the brain is smarter than when I went to sleep.'",
+      "The most striking part isn't the tech. GBrain's reference repo is Tan's own brain: 10,000+ markdown pages, 3,000+ people files, 280+ meeting transcripts, 300+ captured ideas, 13 years of calendar data, 40+ skill modules, 20+ overnight crons. A sitting CEO publishing how he manages relationships, makes investment judgments, and metabolizes reading — fully open. The gesture is more interesting than whether GBrain is technically 'best.'",
+      "An independent audit followed fast. Penfield Labs published a code audit on dev.to with a hard conclusion: 'All three features are markdown documents that instruct an AI agent what to do. The codebase itself contained no rewrite logic, no scheduling, no entity detection.' That is, dream cycles, entity detection, and compiled-truth rewriting — three marquee features — are markdown instruction documents, not executable code.",
+      "What actually exists in code: PostgreSQL + pgvector storage, hybrid retrieval via Reciprocal Rank Fusion, a chunking pipeline. Solid components on their own — but the MCP server, the audit notes, 'ships broken' with documented race conditions, NULL embedding overwrites, and an S3 backend flagged 'not production-ready.'",
+      "The controversy itself proved the gravity. Supporters argue that 'markdown instructions are implementation' is exactly the spirit of LLM Wiki — let the model use docs to organize itself. Critics see it as conflating 'software' with 'prompt.' Within a week, GBrain seeded a downstream wave of agent-harness practice: Hermes Agent, OpenClaw, Paperclip each cite it as design reference.",
+      "An adjacent controversy: MemPalace, which Tan had previously endorsed publicly. The same audit pointed out MemPalace reported Recall@5 retrieval scores as end-to-end QA accuracy; when independent developers ran real QA tests, scores dropped sharply from the claimed 96.6%. Not a GBrain issue itself, but explains why the community ran an audit on GBrain's code too. AI-tool credibility started getting external scrutiny this year.",
+      "Together with Karpathy's LLM Wiki (Volume 2) and Hashimoto's Agent = Model + Harness (Volume 6), GBrain forms the issue's harness family. It grounded an abstract concept into a downloadable concrete repo. You won't copy Tan's 10,000 pages. You will, the next time you build a personal AI tool, find yourself reading its folder structure first."
     ],
     sources: [
       { label: "GitHub · garrytan/gbrain", url: "https://github.com/garrytan/gbrain" },
-      { label: "Noqta · Apr 10 coverage", url: "https://noqta.tn/en/news/garry-tan-gbrain-open-source-ai-agent-memory-2026" },
-      { label: "Saeloun · GBrain + LLM Wiki", url: "https://blog.saeloun.com/2026/04/28/private-karpathy-llm-wiki-gbrain-gstack-rails-ai-workflow" }
+      { label: "Penfield Labs · GBrain code audit", url: "https://dev.to/penfieldlabs/the-yc-president-endorsed-an-ai-memory-system-with-fake-benchmarks-then-he-shipped-his-own-we-4c9l" },
+      { label: "Noqta · GBrain coverage", url: "https://noqta.tn/en/news/garry-tan-gbrain-open-source-ai-agent-memory-2026" },
+      { label: "Gamgee · the Memex we were promised", url: "https://gamgee.ai/blogs/garry-tan-gbrain-ai-memory-system/" },
+      { label: "Threads · GitHub Awesome", url: "https://www.threads.com/@github.awesome/post/DW_atkYFE59" }
     ]
   },
   {
@@ -223,29 +229,32 @@ window.BRIEFING_ITEMS = [
     pull_zh: "「2024 年的关键词是 prompt engineering。2026 年四月，被命名的下一个是 harness。」",
     pull_en: "「The 2024 keyword was prompt engineering. April 2026 named the next: harness.」",
     body_zh: [
-      "在 4 月 8 至 10 日的伦敦 AI Engineer Europe 上，多位独立讲者——Mitchell Hashimoto 在内——不约而同把「agent harness」与「context engineering」列为开发者下一步最该投资的方向。Hashimoto 把它压缩成一句口号：「Agent = Model + Harness」。Red Hat、Martin Fowler 当周也各发长文为这个词命名。",
-      "投资侧的命名几乎在同一周抵达。4 月 3 日，Marc Andreessen 上 Latent Space 录长访谈，用「浏览器之死、Pi + OpenClaw」这条叙事把同一论题从开发者社群推到了资本圈。同一关键词被 builder、conference、capital 三端同时命名，是它能成为「学科」的部分理由。",
-      "四月里至少四份独立实现把这个概念变成产品：Nous Research 的 Hermes Agent（4-08 v0.8、4-13 v0.9、4-16 v0.10、4-27 上 Nous Portal 订阅）；OpenClaw（4 月 GitHub 长期占据榜首）；建在 OpenClaw 之上做 agent 公司编排的 Paperclip（不到四周 38k stars）；以及 Garry Tan 的 GBrain（卷五）。Karpathy 的 LLM Wiki（卷二）是它们共同的语义起点。",
-      "Harness 不是新词——CI/CD 圈用了十年。但它被搬到 AI 语境里有它特定的含义：模型之外，agent 真正赖以「在世界里工作」的一切——permissions、observability、memory、tool-calling 路由、retry 策略、cost ceiling——都属于 harness。这层东西过去两年是「围绕模型加一些 plumbing」，2026 年开始被命名、被独立讨论、被算作团队建制的关键岗位。",
-      "为什么是现在？两个原因。一是模型本身已经稳定到「换一个版本不会让你的 agent 重写」。二是 agent 的失败模式开始系统化——重复尝试、丢失上下文、越权调用、token 爆炸——这些都不能在模型层修，只能在模型外面修。Hashimoto 在演讲里举的例子是「同一个 prompt 在 Cursor 里 work、在 Codex 里不 work」——不是模型差，是 harness 差。",
+      "4 月 8-10 日伦敦 AI Engineer Europe 上，多位独立讲者把「agent harness」与「context engineering」列为开发者下一步最该投资的方向。Mitchell Hashimoto 把它压缩成一句口号：「Agent = Model + Harness」——他自己的解释是：每次 agent 出错，就在系统层面工程化一个解，让 agent 不再犯同一个错。这条公式 2 月已经出现在他个人 blog 里，4 月在大会现场被反复引用。",
+      "投资侧的命名几乎在同一周抵达。4 月 3 日 Marc Andreessen 上 Latent Space 长访谈，用「浏览器之死、Pi + OpenClaw」这条叙事把同一论题从开发者社群推到了资本圈。同一关键词被 builder、conference、capital 三端同时命名，是它能成为「学科」的部分理由。Red Hat、Martin Fowler 当周也各发长文为这个词命名。",
+      "四月里至少四份独立实现把这个概念变成产品：Nous Research 的 Hermes Agent（4 月内连续 v0.8、v0.9、v0.10 三版迭代）；OpenClaw（4 月 GitHub 长期占据榜首）；建在 OpenClaw 之上做 agent 公司编排的 Paperclip；以及 Garry Tan 的 GBrain（卷五）。Karpathy 的 LLM Wiki（卷二）是它们共同的语义起点。",
+      "Harness 不是新词——CI/CD 圈用了十年。但它被搬到 AI 语境里有特定含义：模型之外，agent 真正赖以「在世界里工作」的一切——permissions、observability、memory、tool-calling 路由、retry 策略、cost ceiling——都属于 harness。这层东西过去两年是「围绕模型加一些 plumbing」，2026 年开始被命名、被独立讨论、被算作团队建制的关键岗位。",
+      "为什么是现在？两个原因。一是模型本身已经稳定到「换一个版本不会让你的 agent 重写」——Anthropic 4.6 → 4.7（卷七）、OpenAI GPT-5 → GPT-5.5（卷十一）都是「价格不变、API 兼容」的版本号微调，不是断面。二是 agent 的失败模式开始系统化——重复尝试、丢失上下文、越权调用、token 爆炸——这些都不能在模型层修，只能在模型外面修。Hashimoto 演讲里的例子是「同一个 prompt 在 Cursor 里 work、在 Codex 里不 work」——不是模型差，是 harness 差。",
       "下一阶段会发生什么是这个学科的开放问题。一种可能是它走 DevOps 那条路：先是工种，再是 SaaS（agent control plane 公司），最后回到内部团队的 SRE 化。另一种可能是它太薄、最后被 IDE 厂商和模型实验室自己吃掉，留下「context window 是新世代的 RAM」这种命名工作就够了。两种走向哪个对，今年下半年会知道。",
+      "Atlan、deepset、Software Improvement Group 等企业知识库 / agent 平台公司在四月里都跟进发了 harness 主题文章；Augment Code 把「为什么 88% AI agent 失败」直接归因到 harness 不行——这种业内一致性在过去两年的 prompt engineering 浪潮里没出现过。新词被广泛接受，往往是因为它解释了大家都遇到的同一种问题。",
       "Harness 是本期所有「围绕模型」工作的共同背景——LLM Wiki（卷二）、GBrain（卷五）、Decoupled DiLoCo（卷十二）讨论的都是这一层。它第一次有了自己的名字，也第一次有了自己的工程语言。"
     ],
     body_en: [
-      "April 8–10, AI Engineer Europe in London. Several independent speakers — including Mitchell Hashimoto — named 'agent harness' and 'context engineering' as the #1 priority for developers next. Hashimoto compressed it into a slogan: 'Agent = Model + Harness.' Red Hat and Martin Fowler each published essays naming the term that same week.",
-      "The capital-side naming arrived in the same week. On April 3, Marc Andreessen sat for a long-form Latent Space interview and pushed the same thesis with the framing 'death of the browser, Pi + OpenClaw' — moving the term from developer forums into investor vocabulary. Builder, conference, and capital named the same keyword in one week. That triple naming is part of why it became a 'discipline.'",
-      "April produced at least four implementations that turned the concept into product: Nous Research's Hermes Agent (v0.8 on the 8th, v0.9 on the 13th, v0.10 on the 16th, plus the Nous Portal subscription on the 27th); OpenClaw, which led GitHub trending for most of April; Paperclip, an agent-company orchestrator built atop OpenClaw (38k stars in under four weeks); Garry Tan's GBrain (Volume 5). Karpathy's LLM Wiki (Volume 2) is their shared semantic origin.",
-      "Harness isn't new — CI/CD has used the word for a decade. The April twist gave it specific meaning in AI: everything around the model an agent relies on to 'work in the world' — permissions, observability, memory, tool-calling routes, retry policies, cost ceilings — that's the harness. For two years this layer was 'plumbing around the model.' In 2026 it gets named, discussed independently, and counted as a job description.",
-      "Why now? Two reasons. First, the model itself is stable enough that 'switching versions doesn't force you to rewrite your agent.' Second, agent failure modes have begun to systematize — retry storms, context loss, unauthorized tool calls, token blowups. None of these get fixed in the model layer; they get fixed outside it. Hashimoto's example onstage: 'the same prompt works in Cursor but not in Codex.' Not because the model is bad — because the harness is bad.",
+      "April 8–10, AI Engineer Europe in London. Several independent speakers named 'agent harness' and 'context engineering' as developers' next priority. Mitchell Hashimoto compressed it into a slogan: 'Agent = Model + Harness' — his own gloss: every time an agent fails, engineer a system-level fix so it never fails the same way again. The formula appeared on his personal blog in February; in April it got repeatedly cited from stage.",
+      "The capital-side naming arrived in the same week. On April 3, Marc Andreessen sat for a long-form Latent Space interview and pushed the same thesis with 'death of the browser, Pi + OpenClaw' — moving the term from developer forums into investor vocabulary. Builder, conference, and capital named the same keyword in one week. That triple naming is part of why it became a 'discipline.' Red Hat and Martin Fowler each published essays naming the term that same week.",
+      "April produced at least four implementations that turned the concept into product: Nous Research's Hermes Agent (v0.8, v0.9, v0.10 within April); OpenClaw, leading GitHub trending for most of the month; Paperclip, an agent-company orchestrator built atop OpenClaw; Garry Tan's GBrain (Volume 5). Karpathy's LLM Wiki (Volume 2) is their shared semantic origin.",
+      "Harness isn't new — CI/CD has used the word for a decade. The April twist gave it specific meaning in AI: everything around the model an agent relies on to 'work in the world' — permissions, observability, memory, tool-calling routes, retry policies, cost ceilings. For two years this layer was 'plumbing around the model.' In 2026 it gets named, discussed independently, and counted as a job description.",
+      "Why now? Two reasons. First, the model itself is stable enough that 'switching versions doesn't force you to rewrite your agent' — Anthropic 4.6 → 4.7 (Volume 7) and OpenAI GPT-5 → GPT-5.5 (Volume 11) are 'same price, API-compatible' minor bumps, not generation breaks. Second, agent failure modes have begun to systematize — retry storms, context loss, unauthorized tool calls, token blowups. None of these get fixed in the model layer; they get fixed outside it. Hashimoto's example onstage: 'the same prompt works in Cursor but not in Codex.' Not because the model is bad — because the harness is bad.",
       "What happens next is the discipline's open question. One path mirrors DevOps: first a role, then SaaS (the 'agent control plane' company), finally internalized as SRE for agents. Another path: it stays thin, gets absorbed by IDE vendors and model labs themselves, and 'context window is the new RAM' is all the naming we ever get. Which one wins, second half of this year will tell us.",
+      "Atlan, deepset, Software Improvement Group, and other enterprise knowledge-base / agent-platform companies all published harness-themed pieces in April; Augment Code attributed 'why 88% of AI agents fail' directly to harness deficits. This kind of cross-vendor consensus didn't appear in the prompt-engineering wave. New words get adopted broadly when they explain a problem everyone is already hitting.",
       "Harness is the shared backdrop for everything 'around the model' in this issue — LLM Wiki (Volume 2), GBrain (Volume 5), Decoupled DiLoCo (Volume 12) all live here. It has its name for the first time, and its engineering vocabulary for the first time."
     ],
     sources: [
+      { label: "Mitchell Hashimoto · My AI Adoption Journey", url: "https://mitchellh.com/writing/my-ai-adoption-journey" },
       { label: "Martin Fowler · Harness Engineering", url: "https://martinfowler.com/articles/harness-engineering.html" },
-      { label: "Red Hat · Apr 7", url: "https://developers.redhat.com/articles/2026/04/07/harness-engineering-structured-workflows-ai-assisted-development" },
-      { label: "Latent Space · Andreessen on Pi + OpenClaw", url: "https://www.latent.space/p/pmarca" },
-      { label: "Nous Research · Hermes Agent", url: "https://hermes-agent.nousresearch.com/" },
-      { label: "AI Engineer Europe", url: "https://www.ai.engineer/europe" }
+      { label: "Atlan · what is harness engineering", url: "https://atlan.com/know/what-is-harness-engineering/" },
+      { label: "deepset · build reliable AI agents", url: "https://www.deepset.ai/blog/harness-engineering" },
+      { label: "Augment Code · harness for coding agents", url: "https://www.augmentcode.com/guides/harness-engineering-ai-coding-agents" },
+      { label: "Mohamed Hendawy · three eras of AI agent engineering", url: "https://mohamed-hendawy.medium.com/from-prompts-to-harnesses-the-three-eras-of-ai-agent-engineering-fbd0e6168b21" }
     ]
   },
   {
@@ -258,29 +267,37 @@ window.BRIEFING_ITEMS = [
     sub_en: "Anthropic's other April release, beside Mythos",
     author: "Anthropic",
     date: "April 16, 2026",
-    minutes: 4,
+    minutes: 7,
     spine: { w: 92, h: 380, bg: "#7A1F1F", fg: "#F0E6D2", accent: "#D9B26A", drop: "#F0DAA0" },
     pull_zh: "「价格不变，模型更聪明。这是 Anthropic 这一轮最熟练的发布动作。」",
     pull_en: "「Same price, smarter model. The most fluent release Anthropic has done this cycle.」",
     body_zh: [
-      "Opus 4.7 在 4 月 16 日 GA。Anthropic 4.x 主线半个月内多走了一小步——长程编程任务胜率被官方明确量化提升、视觉模块上调到更高分辨率、token 化器换了一版，定价与 4.6 持平。同一日，AWS Bedrock、Google Vertex AI 和 Microsoft Foundry 都列出新模型可用。「上线」和「上架」之间不再有时间差。",
-      "Opus 4.7 不是 Anthropic 这个月最值得说的版本。八天之前，他们发布了一份名为 Mythos 的研究模型并将其能力封锁，Stratechery 写了长文形容 Anthropic 在 Mythos 上「主动收手」。同一家实验室在四月里同时摆出两件事：一个被压住的版本，和一个被推出去的版本。Opus 4.7 是后者，是用来填主线、不是用来挑边界的版本。",
+      "Opus 4.7 在 4 月 16 日 GA。Anthropic 4.x 主线半个月内多走了一小步——93 题代码基准上比 Opus 4.6 高 13%，包含 4 个 4.6 和 Sonnet 4.6 都解不出的任务；视觉模块上调到更高分辨率；token 化器换了一版。定价完全不变（$5/M input、$25/M output）。同一日，AWS Bedrock、Google Vertex AI、Microsoft Foundry 都列出新模型可用。「上线」和「上架」之间不再有时间差。",
+      "Opus 4.7 不是 Anthropic 这个月最值得说的版本。九天之前，他们发布了一份名为 Mythos 的研究模型并将其能力封锁（卷三）。同一家实验室在四月里同时摆出两件事：一个被压住的版本，和一个被推出去的版本。Opus 4.7 是后者，是用来填主线、不是用来挑边界的版本。CNBC 的概括是「a less risky model than Mythos」；Axios 用的是「concedes it trails Mythos」——这两种措辞拼起来，就是 Anthropic 这一轮的姿态。",
       "「价格不变、模型更聪明」是这一轮发布最熟练的动作。Anthropic 没有把 4.7 包装成新世代——没有新名字、没有新订阅档、没有新发布会。改进被叠加在旧版本号下，让付费曲线保持平稳，让客户合同不需要重新协商。这是上一轮 Opus 3.5 → 3.7 已经走过的剧本，4.7 只是把它做得更熟。",
-      "真正变化的是分发。同一日上 Bedrock / Vertex / Foundry 三家云市场，意味着对手云上也能直接拿到。这一动作在四月底以镜像形式发生在 OpenAI 那边——GPT-5.5 上 Bedrock，宣告了「封闭独占」的时代结束。云厂商不再是渠道而是货架；模型实验室不再为单一云服务，而是为所有云供货。",
-      "从节奏看，Opus 4.7 把四月的速度推到顶。它出现在 GPT Image 2（4 月 21 日）之前一周、GPT-5.5（4 月 23 日）之前一周。三周内三次主线发布，不算各家研究模型与开源模型——任何严肃读者都没办法逐个读完发布说明。月度发布让位给周度发布；周度发布让位给「上架公告」。",
+      "真正变化的是分发。同一日上 Bedrock / Vertex / Foundry 三家云市场，意味着对手云上也能直接拿到。这一动作在四月底以镜像形式发生在 OpenAI 那边——GPT-5.5 上 Bedrock，宣告了「封闭独占」时代的结束。云厂商不再是渠道而是货架；模型实验室不再为单一云服务，而是为所有云供货。",
+      "从节奏看，Opus 4.7 把四月的速度推到顶。它出现在 GPT Image 2（4 月 21 日，卷九）之前一周、GPT-5.5（4 月 23 日，卷十一）之前一周。三周内三次主线发布，不算各家研究模型与开源模型——任何严肃读者都没办法逐个读完发布说明。月度发布让位给周度发布；周度发布让位给「上架公告」。",
+      "在 Stratechery 的解读里（卷三）这次发布还有第二层：Anthropic 同月识别出 DeepSeek、Moonshot、MiniMax 三家通过约 24,000 个伪造账户做工业级蒸馏。把 4.7 推出去意味着它会被复制；不推出去意味着没收入。Mythos 的「克制」和 4.7 的「上架」是同一个商业逻辑里的两面——一边收能力上限，一边稳现金流。",
+      "GitHub Copilot、Cursor、Windsurf 在 4.7 GA 当天就完成切换；GitHub Copilot 把它写进 changelog 的速度比官方发布晚不到几小时。这种「day-zero 集成」是 2026 年新形成的默契——主流 IDE 跟模型实验室之间不再有「评估、谈判、再上线」的时间差，而是预约好了一起放量。",
       "Opus 4.7 单独看不是新闻，把它和 Mythos、GPT-5.5、GPT Image 2 并排看才是。它告诉你 2026 年 Anthropic（以及全行业）的发布逻辑：模型本身不再是悬念，悬念在于这一版被推出来还是被锁起来、定价是续约还是重新议价、上架时间和发布时间是否对齐。四月十六日这一天本身已经说明问题——发布按周走，没人读得完。"
     ],
     body_en: [
-      "On April 16, Anthropic shipped Opus 4.7. Within the 4.x line, this is a half-step rather than a generation: long-running coding tasks scored measurably better, the vision module moved to a higher resolution, the tokenizer was swapped. Pricing stayed at 4.6's. The same day, the model showed up on AWS Bedrock, Google Vertex AI, and Microsoft Foundry. There is no longer a gap between 'shipped' and 'available.'",
-      "This isn't the model worth talking about most this month from Anthropic. Eight days earlier they released a research model called Mythos and kept its capabilities locked. Stratechery wrote a long piece characterizing the move as Anthropic 'actively pulling back.' In the same April, the lab put two things on the table at once: a model held in, and a model pushed out. Opus 4.7 is the latter — built to hold the line, not push the ceiling.",
+      "On April 16, Anthropic shipped Opus 4.7. Within the 4.x line, this is a half-step rather than a generation: 13% higher than Opus 4.6 on a 93-task coding benchmark, including 4 tasks neither 4.6 nor Sonnet 4.6 could solve; the vision module moved to a higher resolution; the tokenizer was swapped. Pricing stayed at 4.6's ($5/M input, $25/M output). The same day, the model showed up on AWS Bedrock, Google Vertex AI, and Microsoft Foundry. There is no longer a gap between 'shipped' and 'available.'",
+      "This isn't the model worth talking about most this month from Anthropic. Nine days earlier they released a research model called Mythos and kept its capabilities locked (Volume 3). In the same April, the lab put two things on the table at once: a model held in, and a model pushed out. Opus 4.7 is the latter — built to hold the line, not push the ceiling. CNBC's framing: 'a less risky model than Mythos.' Axios's: 'concedes it trails Mythos.' Together those two phrasings are the posture.",
       "'Same price, smarter model' is the most fluent release motion of this cycle. Anthropic didn't package 4.7 as a new generation — no new name, no new subscription tier, no keynote. The gains were stacked under the old version number, keeping the payment curve flat and the customer contracts intact. The previous Opus 3.5 → 3.7 cycle ran the same play; 4.7 just does it better.",
       "What's really changing is distribution. Day-one availability across Bedrock / Vertex / Foundry means competitors' clouds become equally legitimate places to pick the model up. The same pattern played out for OpenAI later in April — GPT-5.5 launched on AWS Bedrock too, announcing the end of cloud exclusivity. Hyperscalers stop being channels and become shelves; labs stop selling to a single cloud and start supplying every cloud.",
-      "On cadence, Opus 4.7 pushed April's speed to a peak. It landed a week before GPT Image 2 (Apr 21) and a week before GPT-5.5 (Apr 23). Three frontier releases in three weeks, before counting research previews and open-source drops — no serious reader can finish all the release notes in order. Monthly releases yield to weekly releases; weekly releases yield to 'now-available' announcements.",
+      "On cadence, Opus 4.7 pushed April's speed to a peak. It landed a week before GPT Image 2 (Apr 21, Volume 9) and a week before GPT-5.5 (Apr 23, Volume 11). Three frontier releases in three weeks, before counting research previews and open-source drops — no serious reader can finish all the release notes in order. Monthly releases yield to weekly releases; weekly releases yield to 'now-available' announcements.",
+      "Per Stratechery's reading (Volume 3), this release has a second layer: Anthropic that month identified three labs — DeepSeek, Moonshot, MiniMax — running industrial-scale distillation through ~24,000 fraudulent accounts. Releasing 4.7 means it will be copied; not releasing it means no revenue. Mythos's 'restraint' and 4.7's 'shipping' are two sides of the same commercial logic: cap the ceiling, stabilize the cash flow.",
+      "GitHub Copilot, Cursor, and Windsurf all switched to 4.7 the day it went GA; Copilot's changelog entry landed hours after Anthropic's announcement. This 'day-zero integration' is a 2026 norm — between mainstream IDEs and model labs there's no longer an 'eval, negotiate, list' gap, just coordinated release.",
       "Opus 4.7 alone isn't news. Read alongside Mythos, GPT-5.5, and GPT Image 2, it is. It tells you the 2026 release logic for Anthropic — and for the field: the model itself stops being the suspense; the suspense is whether this version gets pushed out or locked in, whether pricing renews or reopens, whether the listing date matches the launch date. April 16 itself names the cadence — releases now arrive weekly, faster than anyone can finish reading them."
     ],
     sources: [
       { label: "Anthropic · Opus 4.7", url: "https://www.anthropic.com/news/claude-opus-4-7" },
-      { label: "CNBC · Apr 16", url: "https://www.cnbc.com/2026/04/16/anthropic-claude-opus-4-7-model-mythos.html" }
+      { label: "CNBC · less risky than Mythos", url: "https://www.cnbc.com/2026/04/16/anthropic-claude-opus-4-7-model-mythos.html" },
+      { label: "Axios · concedes it trails Mythos", url: "https://www.axios.com/2026/04/16/anthropic-claude-opus-model-mythos" },
+      { label: "GitHub Changelog · Copilot Apr 16", url: "https://github.blog/changelog/2026-04-16-claude-opus-4-7-is-generally-available/" },
+      { label: "AWS · Opus 4.7 in Bedrock", url: "https://aws.amazon.com/blogs/aws/introducing-anthropics-claude-opus-4-7-model-in-amazon-bedrock/" },
+      { label: "Anthropic API docs · what's new in 4.7", url: "https://platform.claude.com/docs/en/about-claude/models/whats-new-claude-4-7" }
     ]
   },
   {
