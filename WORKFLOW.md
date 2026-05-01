@@ -166,11 +166,14 @@ Inside a chapter's prose, refer to other chapters as `卷 N` / `Volume N` for th
 - Dimensions: **1024 × 1536** (portrait, 2:3)
 - Format: PNG
 - Filenames: `covers/vol-01.png` … `covers/vol-NN.png` (numeric, padded)
-- Optional `covers/manifest.js` for manual override:
+- **`covers/manifest.js` MUST list every cover** (one line per volume). The manifest looks "optional" because the app falls back to scanning `covers/` via `fetch()`, but that fallback only works on `python -m http.server` (which renders directory listings). **GitHub Pages disables directory listing**, so on the live site every cover that isn't in `manifest.js` shows the typographic fallback. Always update `manifest.js` when you add a chapter.
+
   ```js
   window.COVER_ASSETS = {
-    "vol-01": "covers/custom-emotion.png",  // overrides auto-detection
-    // ...
+    "vol-01": "covers/vol-01.png",
+    "vol-02": "covers/vol-02.png",
+    // ... one entry per volume — no exceptions
+    "vol-NN": "covers/vol-NN.png",
   };
   ```
 
@@ -489,6 +492,7 @@ These are not nice-to-haves; they're places previous iterations went wrong:
 8. **Never close a paragraph with a clever metaphor.** Especially metaphors that conflate technical and non-technical jargon (「可以 GA 但不可被读完的速度」). The reader has to decode rather than understand.
 9. **Drop the meta-placement framing.** "把它放在卷 X" reads like a TOC commentary, not an editorial close.
 10. **Covers via auto-detection, not manual rename.** User explicitly asks for this. `covers/vol-NN.png` is enough.
+11. **`covers/manifest.js` is mandatory on the live site.** The auto-detection via `fetch("covers/")` only finds files when the server returns a directory listing — `python -m http.server` does, GitHub Pages does NOT. So a cover can render perfectly on `localhost:8088` and 404-fallback to text on `*.github.io`. Whenever you add a chapter, also add its line to `covers/manifest.js`. Same for any new month.
 
 ---
 
