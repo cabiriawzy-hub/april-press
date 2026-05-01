@@ -55,30 +55,36 @@ window.BRIEFING_ITEMS = [
     sub_en: "One Karpathy gist rewrote the default answer for AI memory",
     author: "Andrej Karpathy",
     date: "April 03, 2026",
-    minutes: 6,
+    minutes: 7,
     spine: { w: 76, h: 350, bg: "#1F3A4A", fg: "#E8DCC4", accent: "#D9B26A", drop: "#F0C56A" },
     pull_zh: "「16,000,000 浏览，是为一个三层文件夹的命名规范。」",
     pull_en: "「16 million views — for a three-folder naming convention.」",
     body_zh: [
-      "Andrej Karpathy 在 4 月 3 日把一份名为 LLM Wiki 的 GitHub gist 公开。一句话：用 markdown 文件夹组织知识，让 LLM 自己往里写、自己往外读，弃用 RAG 那一套向量库。结构里的连接靠 [[wiki-links]]，模型既是读者又是编辑。",
-      "这听起来像一份「极简编程笔记」，但它点的是 RAG 的痛处。过去三年里，AI 应用层把知识塞进模型最常用的方案是 RAG——用 embedding 把文档切片、检索、注入。RAG 在工程上有效，但有两个长期问题：模型不能控制写回，知识结构对人和模型都不可读。Karpathy 的提议是把这两件事一起解决。",
-      "48 小时内，gist 被看了 1,600 万次、5,000 颗 star、485 条评论；围绕「Karpathy 是不是杀死了 RAG」的讨论占据了几乎所有 AI 开发者社群。Karpathy 本人不把它当作发现，工程社区却把它当作一种「一直缺的简洁答案」。",
-      "严格来说，LLM Wiki 没有发明任何新组件——markdown、wiki-link、folder hierarchy 都是 1990 年代的东西。新的是配置：把这些组件交给 LLM 自己使用。Karpathy 的样本仓库里，LLM 会主动重构文件结构、合并重复条目、提出新的交叉链接。换句话说，知识库第一次有了「自维护」的主体。",
-      "把它放在 2026 年 4 月里看，它属于「harness」这个新家族——本期里 Hermes Agent、Garry Tan 的 GBrain、Mitchell Hashimoto 的「Agent = Model + Harness」是这个家族的同月样本。它们指向同一件事：模型本身已经稳定，工程的边界在模型外那一层。下游的 GBrain、Hermes Agent、OpenHarness 各自把这份 gist 引为出发点。",
+      "Andrej Karpathy 4 月 3 日把一份名为 LLM Wiki 的 GitHub gist 公开。一句话：用 markdown 文件夹组织知识，让 LLM 自己往里写、自己往外读，弃用 RAG 那一套向量库。结构是三层——raw/ 放原始素材（PDF、笔记、抓页）；wiki/ 放 LLM 编纂的概要文章，一篇一概念；CLAUDE.md（或类似 schema 文件）规定整个 wiki 的结构和工作流。链接靠 [[wiki-links]]，模型既是读者又是编辑。",
+      "工作流 Karpathy 写得很具体。Ingest：来源文件丢进 raw/，模型读完它、提取关键点、写 summary 页、更新 index、连带改 10-15 篇相关 wiki 页——一次过。Query：用户提问，模型从 index 找入口、读相关页、给带引用的回答；如果回答本身有价值，再把它存成新的 wiki 页。Lint：定期跑「健康检查」，找矛盾、过时声明、孤立页、缺失的交叉链接。",
+      "这听起来像一份「极简笔记法」，但它点的是 RAG 的痛处。Karpathy 自己的说法：传统 RAG 在每个问题上都「从零重新发现知识」；wiki 模式是「持久的、复利的工件，交叉链接早就在那里」。三年里，AI 应用层把知识塞进模型最常用的方案是 RAG——切片、embedding、检索、注入。RAG 工程上有效，但有两个长期问题：模型不能控制写回，知识结构对人和模型都不可读。Wiki 模式把这两件事一起解决。",
+      "48 小时内，gist 被看了 1,600 万次、5,000 颗 star、近 500 条评论；「Karpathy 是不是杀死了 RAG」占据了几乎所有 AI 开发者社群一周。社区在两天内给出多份独立实现：obsidian-wiki 插件、一个完整的 llm-wiki GitHub 仓库、一份 v2 gist（在原版上叠加 agent memory 架构）。Karpathy 本人不把它当作发现，工程社区却把它当作一种「一直缺的简洁答案」。",
+      "严格来说，LLM Wiki 没发明任何新组件——markdown、wiki-link、folder hierarchy 都是 1990 年代的东西。新的是配置：把这些组件交给 LLM 自己使用。在 Karpathy 的样本仓库里，模型会主动重构文件结构、合并重复条目、提出新的交叉链接。换句话说，知识库第一次有了「自维护」的主体——维护成本第一次往下走，而不是往上走。",
+      "这套做法的边界 Karpathy 也写清楚了：适用于「中等规模」——大约 100 份来源、几百页 wiki，单 model context window 能装下整个 index 的范围。对企业级（百万级文档）依然需要 RAG 或混合方案；这点 Atlan 等做企业知识库的公司在跟进文章里写得很直接。它解决的是「个人和小团队」的知识库问题，不是替代向量检索。",
+      "它跟 Hermes Agent、Garry Tan 的 GBrain（卷五）、Mitchell Hashimoto 的「Agent = Model + Harness」（卷六）是同月样本，指向同一件事：模型本身已经稳定，工程的边界在模型外那一层。下游 GBrain、Hermes Agent、OpenHarness 各自把这份 gist 引为出发点。这是 4 月里最值得记的一种模式——同一件事在一个月里被四五个人独立命名、独立实现。",
       "你下次写 RAG 系统未必会照抄它。但读完之后，你回到向量库那一套，会忍不住问：模型为什么不参与决定知识怎么组织？这一问，是 2026 年的问题，不是 2024 年的问题。"
     ],
     body_en: [
-      "On April 3, Andrej Karpathy posted a GitHub gist titled LLM Wiki. The pitch in one line: organize knowledge in plain markdown folders, let the LLM read from and write into the structure itself, drop the RAG vector store. Connections are [[wiki-links]]; the model is both reader and editor.",
-      "It reads like a programmer's note, but it strikes RAG where it hurts. For three years the standard way to put knowledge into model-driven products has been RAG — chunk, embed, retrieve, inject. RAG works, but it has two long-running problems: the model has no agency over writes, and the knowledge structure is illegible to both humans and the model. Karpathy's proposal solves both at once.",
-      "Within 48 hours: 16M views, 5,000 stars, 485 comments. 'Did Karpathy just kill RAG?' colonized AI dev forums for the rest of the week. Karpathy himself didn't frame it as a discovery; the engineering community treated it as 'the simple answer we'd been missing.'",
-      "Strictly, LLM Wiki invents no new component — markdown, wiki-links, folder hierarchies are all 1990s. The new thing is the wiring: hand those components to the LLM. In Karpathy's sample repos, the model actively refactors the tree, merges duplicates, proposes new cross-links. For the first time, the knowledge base has its own maintainer.",
-      "Read inside April 2026, it belongs to the new 'harness' family — alongside Hermes Agent, Garry Tan's GBrain, and Mitchell Hashimoto's 'Agent = Model + Harness' from the same month. They all point to one thing: the model itself is stable; the engineering frontier has moved one ring outward. Downstream — GBrain, Hermes Agent, OpenHarness — almost all cite this gist as origin.",
+      "On April 3, Andrej Karpathy posted a GitHub gist titled LLM Wiki. The pitch in one line: organize knowledge in plain markdown folders, let the LLM read from and write into the structure itself, drop the RAG vector store. The architecture is three-layer — raw/ for source material (PDFs, notes, clippings); wiki/ for LLM-compiled concept pages, one per topic; and a schema document (CLAUDE.md or similar) defining the wiki's structure and workflows. Connections are [[wiki-links]]; the model is both reader and editor.",
+      "The workflow is spelled out concretely. Ingest: drop a source into raw/, the model reads it, extracts key points, writes a summary page, updates the index, and edits 10-15 related wiki pages — all in one pass. Query: user asks a question, the model enters via the index, reads relevant pages, returns an answer with citations; valuable answers get filed back as new wiki pages. Lint: periodic health checks for contradictions, stale claims, orphan pages, missing cross-references.",
+      "It reads like a programmer's note, but it hits RAG where it hurts. Karpathy's own framing: traditional RAG 'rediscovers knowledge from scratch on every question'; the wiki pattern is 'a persistent, compounding artifact — the cross-references are already there.' For three years the standard way to give models access to knowledge has been RAG: chunk, embed, retrieve, inject. RAG works engineering-wise, but it has two long-running problems: the model has no agency over writes, and the knowledge structure is illegible to both humans and the model. The wiki pattern solves both at once.",
+      "Within 48 hours: 16M views, 5,000 stars, ~500 comments; 'Did Karpathy just kill RAG?' colonized AI dev forums for the rest of the week. Community produced multiple independent implementations within days: obsidian-wiki plugins, a full llm-wiki GitHub repo, a v2 gist extending the original with agent memory architecture. Karpathy didn't frame it as a discovery; the engineering community treated it as 'the simple answer we'd been missing.'",
+      "Strictly speaking, LLM Wiki invents no new component — markdown, wiki-links, folder hierarchies are all 1990s. The new thing is the wiring: hand those components to the LLM. In Karpathy's sample repos, the model actively refactors the tree, merges duplicates, proposes new cross-links. For the first time, the knowledge base has its own maintainer — and maintenance cost trends down rather than up.",
+      "Karpathy is explicit about scope: this works at 'moderate scale' — roughly 100 sources, hundreds of pages, the index small enough to fit a single model's context window. For enterprise scale (millions of documents), RAG or hybrid setups remain necessary; companies building enterprise knowledge bases like Atlan have said as much in follow-up posts. LLM Wiki replaces RAG for personal and small-team knowledge bases, not for vector search itself.",
+      "It belongs in the same month as Hermes Agent, Garry Tan's GBrain (Volume 5), and Mitchell Hashimoto's 'Agent = Model + Harness' (Volume 6). They point to the same shift: the model itself is stable; the engineering frontier has moved one ring outward. Downstream — GBrain, Hermes Agent, OpenHarness — almost all cite this gist as origin. The most April-shaped pattern of the issue: the same thing being named and implemented by four or five people independently in a single month.",
       "You won't necessarily copy LLM Wiki for your next system. But after reading it, returning to vector stores leaves you asking: why isn't the model involved in deciding how knowledge is organized? That question is a 2026 question, not a 2024 question."
     ],
     sources: [
       { label: "Karpathy gist · Apr 3", url: "https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" },
-      { label: "Towards AI · Did Karpathy kill RAG?", url: "https://pub.towardsai.net/andrej-karpathy-killed-rag-or-did-he-the-llm-wiki-pattern-7824d876e790" },
-      { label: "Remio · 16M-view analysis", url: "https://www.remio.ai/post/andrej-karpathy-published-an-llm-wiki-pattern-16-million-views-for-a-folder-structure" }
+      { label: "Remio · 16M views breakdown", url: "https://www.remio.ai/post/andrej-karpathy-published-an-llm-wiki-pattern-16-million-views-for-a-folder-structure" },
+      { label: "Decode the Future · 3-layer pattern guide", url: "https://decodethefuture.org/en/llm-wiki-karpathy-pattern/" },
+      { label: "Atlan · LLM Wiki vs enterprise RAG", url: "https://atlan.com/know/llm-wiki-vs-rag-knowledge-base/" },
+      { label: "Level Up Coding · knowledge that compounds", url: "https://levelup.gitconnected.com/beyond-rag-how-andrej-karpathys-llm-wiki-pattern-builds-knowledge-that-actually-compounds-31a08528665e" }
     ]
   },
   {
@@ -91,32 +97,37 @@ window.BRIEFING_ITEMS = [
     sub_en: "Ben Thompson on a non-release",
     author: "Ben Thompson · Stratechery",
     date: "April 08, 2026",
-    minutes: 8,
+    minutes: 7,
     spine: { w: 88, h: 360, bg: "#1A2A3F", fg: "#E8DCC4", accent: "#A33A2A", drop: "#BFD2E8" },
     pull_zh: "「能力不是产品的终点，是它的边界条件。」",
     pull_en: "「Capability is not a product's destination — it's its constraint.」",
     body_zh: [
-      "Anthropic 把 Claude Mythos 锁住了，仅向受限的安全研究者开放——这是这家公司历史上对自家最强模型最严的一次约束。Ben Thompson 在 4 月 8 日的 Stratechery 长文里把这个决定，称为「这个月最值得读三遍的事」。",
-      "Mythos 在 Anthropic 内部的能力上限被估算高于 Opus 4.x 一档；但他们没有把它推出去。理由不是技术——技术上 Mythos 已经足够稳定。理由更像是「我们暂时不知道这一档能力外溢之后会发生什么」。Project Glasswing 的早期评估也指向同一个不确定性。",
-      "Stratechery 的解读把 Mythos 与 OpenAI、Google 的「按月发布」方向作对比。前沿实验室过去两年的默认动作是越来越快地把模型推出去——更短的发布周期、更激进的能力曲线。Anthropic 的 Mythos 是这条曲线上的第一次反方向：不是减速，而是直接「把它拿回来」。",
-      "Thompson 的论点真正新的部分不在「该不该发」，而在「这种决定本身就是新生的产品形态」：当能力的天花板与外部副作用同步抬升，「发布与否」会变成一种可设计的策略——和定价、版本、API 配额一样，由实验室来定义。",
-      "这件事的复杂在于它无法独立成立。要让「主动收手」站得住脚，Anthropic 必须在主线（4.x）里继续提供有竞争力的能力——否则收手等于退出市场。所以这个月他们同时摆出两件事：被压住的 Mythos，和被推出去的 Opus 4.7（见卷七）。这是一对仗的发布动作。",
-      "业界反应分两边。一边把 Mythos 视为「负责任 AI」的具体标杆——它给此前抽象的 alignment 讨论提供了产品化的对照；Simon Willison 与英国 AISI 的回应都把 Thompson 的措辞作为起点。另一边批评它是 PR：「能力没真正释放就谈不上克制」。两种解读都有道理；问题在于谁能给出判别标准——Anthropic 没有承诺指标，Stratechery 也没有。",
-      "和 Opus 4.7（卷七）成对读，能看到一家公司在同一个月里同时摆出「克制」和「推进」两种动作——这是 2026 年最值得记住的发布姿态。"
+      "Anthropic 4 月 7 日发布 Claude Mythos Preview——一个内部认为是「目前世界上最强的模型」的版本，但他们没有公开发布。Mythos 在 SWE-bench Verified 上拿到 93.9%（Opus 4.6 是 80.8%），USAMO 2026 上 97.6%（4.6 是 42.3%）；这种代际式跃升不是它被锁住的理由——锁住的具体理由是网络安全：Mythos 能自主识别并利用真实软件里的 zero-day 漏洞。",
+      "Anthropic 红队在 red.anthropic.com 公开了战绩：Mythos 自主发现并利用了一个 17 年没人发现的 FreeBSD 远程代码执行漏洞、一个 27 年的 OpenBSD TCP SACK bug；它把四个 web 浏览器漏洞链起来、做了 JIT heap spray 同时绕过 renderer 沙箱和 OS 沙箱；在 OSS-Fuzz 上拿到 10 个目标的完整 control flow 劫持。同样的任务 Opus 4.6 几百次尝试只成功 2 次，Mythos 是 181 次。",
+      "取代公开发布的，是 Project Glasswing——Anthropic 牵头的受控部署，把 Mythos 给 AWS、Apple、Cisco、CrowdStrike、Google、JPMorgan、Linux Foundation、Microsoft、NVIDIA、Palo Alto Networks 等 50+ 机构「用来防御」，配套 $100M 的 usage credits，目标是赶在攻击者复现之前先把关键软件里的同类漏洞找出来。",
+      "Ben Thompson 在 Stratechery 写了三篇连续分析。他的核心论点：Anthropic 不是单纯的「负责任」——他们识别出 DeepSeek、Moonshot、MiniMax 三家通过约 24,000 个伪造账户做工业级蒸馏（用强模型输出训练弱模型），公开发布 Mythos 等于把这个能力直接送给对手；不公开发布同时还能维持 pricing power——「克制」既是一种安全姿态，也是商业策略。",
+      "前沿实验室过去两年的默认动作是越来越快地推模型出去：更短的发布周期、更激进的能力曲线。Mythos 是这条曲线上第一次反方向——不是减速，是直接把它拿回来。Stratechery 的判断是这一动作可能定义 2026 年的发布姿态：当能力上限和外部副作用同时抬升，「发布与否」会变成一种像定价、版本、API 配额一样可设计的策略。",
+      "4 月 22 日有意外：一个私密论坛的小群体被报道在 Mythos 限定发布的同一天就拿到访问权限，Anthropic 立刻启动调查。这件事不否定 Project Glasswing 的逻辑，反而强化它——这一层能力即便受限发布、即便只给 50 多家机构，泄露面依然存在。",
+      "4 月 30 日 OpenAI 跟进——他们之前公开批评过 Anthropic 限定 Mythos，自己却把 Cyber（一个同类的网络安全模型）改成限定访问。这是 2026 年第一次出现「限定发布」从单家公司的争议姿态变成行业的默契：不是对外宣布的政策，是被相同事件依次推到同一立场。",
+      "和卷一（情绪向量）配在同一家公司里读：4 月 2 日她们公开了模型内部的可解释性研究，4 月 7 日她们把更强的模型锁回去——一边在向内看模型，一边在向内拿回控制权。和卷七（Opus 4.7）成对读：同一个月一边「克制」、一边把 4.7 推到产品线，是 2026 年最值得记住的两手发布。"
     ],
     body_en: [
-      "Anthropic restricted Claude Mythos to a small group of security researchers — the most aggressive containment they have ever applied to their own model. In his April 8 Stratechery essay, Ben Thompson called the decision 'the most-read-three-times thing of the month.'",
-      "Mythos's capability ceiling is estimated internally at Anthropic to sit above Opus 4.x by roughly one tier. They didn't ship it. Not for technical reasons — Mythos is technically stable. The reason is closer to 'we don't yet know what happens when capabilities at this tier leak.' Early Project Glasswing evaluations point to the same uncertainty.",
-      "Stratechery's reading places Mythos against OpenAI's and Google's monthly-release cadence. Frontier labs have, for two years, defaulted to pushing models out faster — shorter cycles, more aggressive capability curves. Anthropic's Mythos is the first reverse on that curve: not slowing down, but pulling back.",
-      "Thompson's actual new claim isn't whether the call was right. It's that the decision itself is a new product surface: as capability ceilings and external risks rise together, 'release or not' becomes a designable strategy — alongside pricing, versioning, API quota — defined by the lab.",
-      "The decision can't stand on its own. For 'active restraint' to hold up, Anthropic must keep main-line (4.x) competitive — otherwise restraint equals exit. So this month they put two things on the table at once: the locked-down Mythos, and the pushed-out Opus 4.7 (see Volume 7). It's a paired release move.",
-      "Industry response splits in two. One side reads Mythos as a concrete benchmark for 'responsible AI' — a product-form analog to previously abstract alignment debates; Simon Willison and the UK AISI responses both pick up Thompson's vocabulary. The other reads it as PR: 'restraint without ever releasing capability isn't restraint.' Both readings hold; the open question is who can define the criterion. Anthropic hasn't committed to one. Neither has Stratechery.",
-      "Pair-read with Volume 7 (Opus 4.7) and you see one lab in one month performing both 'restraint' and 'advance' as deliberate gestures — the most consequential release posture of 2026 so far."
+      "On April 7, Anthropic announced Claude Mythos Preview — internally considered 'the most powerful model in the world' — and didn't release it. Mythos hits 93.9% on SWE-bench Verified (Opus 4.6: 80.8%) and 97.6% on USAMO 2026 (4.6: 42.3%). The generational jump isn't why it was held back. The specific reason is cybersecurity: Mythos can autonomously identify and exploit zero-day vulnerabilities in real software.",
+      "Anthropic's red team published the specifics on red.anthropic.com. Mythos found and exploited a 17-year-old FreeBSD remote-code-execution bug and a 27-year-old OpenBSD TCP SACK implementation flaw on its own. It chained four browser vulnerabilities into a JIT heap spray that escaped both renderer and OS sandboxes. On OSS-Fuzz, it achieved full control-flow hijack on 10 separate targets. Comparable tasks where Opus 4.6 succeeded 2 out of several hundred attempts: Mythos succeeded 181 times.",
+      "In place of public release, Anthropic launched Project Glasswing — a controlled deployment to 50+ institutions including AWS, Apple, Cisco, CrowdStrike, Google, JPMorgan, the Linux Foundation, Microsoft, NVIDIA, and Palo Alto Networks, backed by $100M in usage credits. Goal: find and patch the same class of vulnerabilities in critical software before attackers can replicate the capability.",
+      "Ben Thompson wrote three consecutive Stratechery essays on it. His core argument: Anthropic isn't just 'being responsible.' They had identified three labs — DeepSeek, Moonshot, MiniMax — running industrial-scale distillation (training weaker models on stronger ones' outputs) through ~24,000 fraudulent accounts; releasing Mythos publicly would have handed the capability directly to those operators. Holding it back also preserves pricing power. 'Restraint' is both a safety posture and a commercial strategy.",
+      "Frontier labs spent the last two years defaulting to faster releases — shorter cycles, sharper capability curves. Mythos is the first reverse on that curve: not slowing, but pulling back. Stratechery's read: this might define 2026's release stance. When capability ceilings and external side effects rise together, 'whether to release' becomes a designable strategy — alongside pricing, versioning, and API quota — defined by the lab.",
+      "April 22 brought a complication: a small group on a private forum reportedly gained access to Mythos on the same day it went into limited testing; Anthropic launched an investigation. The incident doesn't undermine the Glasswing logic — it reinforces it. Even with restricted release to 50+ institutions, the leak surface exists.",
+      "April 30: OpenAI, having previously criticized Anthropic's Mythos restriction, restricted access to its own Cyber model. 2026's first instance of 'limited release' moving from one company's contested posture to industry tacit consensus — not announced policy, just the same event pushing parties to the same position.",
+      "Read alongside Volume 1 (Emotion Vectors) at the same company: April 2 they published interpretability research that looks inside the model; April 7 they pulled a more powerful model back. Inward looking and inward control, in counter-rhythm. Read alongside Volume 7 (Opus 4.7): in the same month they restrained one model and shipped another into the product line. The two-handed release stance is what's worth remembering from April."
     ],
     sources: [
+      { label: "Anthropic Red Team · Mythos Preview", url: "https://red.anthropic.com/2026/mythos-preview/" },
       { label: "Stratechery · Myth and Mythos", url: "https://stratechery.com/2026/myth-and-mythos/" },
-      { label: "Simon Willison · Project Glasswing", url: "https://simonwillison.net/2026/Apr/7/project-glasswing/" },
-      { label: "UK AISI · Mythos cyber eval", url: "https://www.aisi.gov.uk/blog/our-evaluation-of-claude-mythos-previews-cyber-capabilities" }
+      { label: "Stratechery · Mythos, Muse, opportunity cost of compute", url: "https://stratechery.com/2026/mythos-muse-and-the-opportunity-cost-of-compute/" },
+      { label: "NBC News · Why Anthropic won't release", url: "https://www.nbcnews.com/tech/security/anthropic-project-glasswing-mythos-preview-claude-gets-limited-release-rcna267234" },
+      { label: "TIME · Too Dangerous to Release", url: "https://time.com/article/2026/04/24/claude-mythos-chatgpt-rosalind-release-dangerous/" },
+      { label: "TechCrunch · OpenAI restricts Cyber", url: "https://techcrunch.com/2026/04/30/after-dissing-anthropic-for-limiting-mythos-openai-restricts-access-to-cyber-too/" }
     ]
   },
   {
@@ -129,30 +140,36 @@ window.BRIEFING_ITEMS = [
     sub_en: "METR adds evidence to the AI-R&D timeline",
     author: "METR & Epoch AI",
     date: "April 10, 2026",
-    minutes: 6,
+    minutes: 7,
     spine: { w: 60, h: 330, bg: "#2A2A2A", fg: "#E6E1D6", accent: "#B89968", drop: "#E0A56A" },
     pull_zh: "「不再是「能不能写函数」的问题，而是「能不能维持一个项目」。」",
     pull_en: "「It's no longer 'can it write a function.' It's 'can it carry a project.'」",
     body_zh: [
-      "METR 与 Epoch AI 在 4 月 10 日联手公开 MirrorCode 的初步结果——一个新基准，让模型仅凭 spec 与测试，自主重写一份 1.6 万行的生信工具包。Claude Opus 4.6 完成了这个任务。",
-      "这个基准的设计本身比单一分数更值得讨论。过去两年里，coding 基准从 HumanEval（每题不到 100 行）到 SWE-bench（每个 issue 几十行）一路扩大尺度，但都还是「补丁式」任务。MirrorCode 第一次让规模跨过「可以让人吃午饭时也读完」的阈值——它要求模型在数千个相互依赖的函数之间维持一致性，并自己决定从哪里开始重写。",
-      "在此之前，关于「AI 何时能做几周长的研究工作」的讨论一直停留在估计与预测之间。METR 的「自主时长」估算用的是访谈和反向推理，Epoch 的曲线也建立在外推之上。MirrorCode 是第一份具体的、可复现的数据点：一个真实存在的工具包、一份真实的测试套件、一个可量化的通过率。",
-      "可复现性同时是这份工作的核心议题。METR/Epoch 在论文里强调「目前 hold-out 的工具包并未公开释放」——他们想避免基准被纳入下一轮训练。社区分两派：一派把 hold-out 视为必要的对抗措施，另一派担心 hold-out 政策本身让基准结果难以被独立复现。这一争论在它发布后的一周里取代了所有别的话题。",
-      "把它和卷六 Harness Engineering 一起读，会看到同一个判断：2026 年衡量模型的指标，已经不是单条指令的胜率，而是模型在长链路、多文件、多目标里的稳定性。「全栈代码」第一次进入了基准维度，意味着以后的每一份发布说明都要在这个维度上给一个数。",
-      "对工具集团来说，MirrorCode 是一份冷静的提醒：你日常使用的代码 agent 与基准里的能力曲线有清晰差距。承认这个差距，比把它修辞掉，对工程更有用。MirrorCode 发布的那一周，时间表派与怀疑派的争论第一次拥有了相同的引用。"
+      "METR 与 Epoch AI 在 4 月 10 日联手公开 MirrorCode 的初步结果——一个新基准，让模型仅凭 spec 与测试，自主重写一份指定的命令行程序。Claude Opus 4.6 在 gotree（一份约 1.6 万行 Go、40+ 命令的生信工具包）上拿到 99.95% 通过率（2000/2001 测试），人类工程师做同样的事估算需要 2-17 周。",
+      "基准全套包括 24 个目标程序，覆盖 Unix 工具、数据序列化、生信、解释器、静态分析、加密、压缩、配置语言等多个领域。初步结果只公开了四个：choose（字符串处理）和 cal（日历工具）4.6 都接近 100%；gotree 99.95%；Pkl（一种配置语言）只有 35%（256/733）——同一个模型，跨领域稳定性差异巨大。",
+      "基准的设计本身比单一分数更值得讨论。过去两年里，coding 基准从 HumanEval（每题不到 100 行）到 SWE-bench（每个 issue 几十行）一路扩大尺度，但都还是「补丁式」任务。MirrorCode 第一次让规模跨过「可以让人吃午饭时也读完」的阈值——它要求模型在数千个相互依赖的函数之间维持一致性，并自己决定从哪里开始重写。",
+      "在此之前，关于「AI 何时能做几周长的工作」的讨论一直停留在估计与预测之间。METR 的「自主时长」估算用的是访谈和反向推理，Epoch 的曲线建立在外推之上。MirrorCode 是第一份具体的、可复现的数据点：一个真实存在的程序、一份真实的测试套件、一个可量化的通过率——而不是一个时间表。",
+      "可复现性是这份工作的核心议题。METR/Epoch 用了「dual test」机制——每个公开测试都有一个隐藏的等价变体（同样的逻辑、不同的值），用来检测模型是否在 hardcode。论文里的原话：「the AI's solutions are not hard-coded」。这个机制本身在社区里也有讨论：一派把它视为对训练污染的必要防御，一派担心它让结果难以被外部完整复现。",
+      "作者自己写下的限制同样克制。他们承认三件事：MirrorCode 要求的是「精确、可程序化校验的 spec」，而真实软件开发很少长这样；测试集可能被未来训练数据污染；覆盖的软件领域有限。结论里的原话：「our findings may not translate directly to typical software development practices」——这是研究者自己提的边界。",
+      "和卷六（Harness Engineering）一起读，会看到同一个判断：2026 年衡量模型的指标，已经不是单条指令的胜率，而是模型在长链路、多文件、多目标里的稳定性。「全栈代码」第一次进入了基准维度，意味着以后每一份发布说明都要在这个维度上给一个数。",
+      "对工具团队来说，MirrorCode 是一份冷静的提醒：你日常使用的代码 agent 与基准里的能力曲线之间有清晰差距。承认这个差距，比把它修辞掉，对工程更有用。它发布的那一周，时间表派与怀疑派的争论第一次拥有了相同的引用——这件事比任何一个具体数字都更值得记一笔。"
     ],
     body_en: [
-      "On April 10, METR and Epoch released preliminary results from MirrorCode — a benchmark in which a model autonomously reimplements a 16k-line bioinformatics toolkit from spec and tests alone. Claude Opus 4.6 completed it.",
-      "The benchmark's design is more interesting than the single score. Coding benchmarks have scaled from HumanEval (under 100 lines per problem) through SWE-bench (tens of lines per issue) — but stayed 'patch-shaped.' MirrorCode is the first to cross the 'longer than you can read over lunch' threshold; the model has to hold consistency across thousands of interdependent functions, and decide for itself where to start.",
-      "Until now, 'when can AI sustain weeks of research work' lived in projections. METR's autonomy-duration estimates relied on interviews and reverse inference; Epoch's curves built on extrapolation. MirrorCode is the first concrete, reproducible datapoint: a real toolkit, a real test suite, a quantifiable pass rate.",
-      "Reproducibility is also the work's core open question. METR/Epoch explicitly hold the toolkit out of public release — they want to avoid the benchmark being absorbed into the next training run. The community splits: some treat hold-out as necessary defense, others worry it makes the result hard to reproduce independently. That argument occupied the entire following week.",
-      "Read alongside Volume 6 (Harness Engineering), the convergence is clear: the metric for evaluating models in 2026 is no longer single-instruction win rate but stability across long chains, many files, multiple objectives. 'Full-stack code' enters the benchmark dimension for the first time — meaning every release note from now on owes a number on this axis.",
-      "For toolchain teams, MirrorCode is a sobering reminder: your everyday code agent has a measurable gap with the capability curve in the benchmark. Acknowledging the gap is more useful for engineering than rhetorically closing it. The week MirrorCode dropped, timeline-watchers and skeptics finally had the same artifact to argue from."
+      "On April 10, METR and Epoch AI released preliminary results from MirrorCode — a benchmark in which a model autonomously reimplements a specified command-line program from spec and tests alone. Claude Opus 4.6 hit 99.95% on gotree (a ~16,000-line Go bioinformatics toolkit with 40+ commands, 2000/2001 tests passed) — a task estimated to take a human engineer 2-17 weeks.",
+      "The full benchmark includes 24 target programs spanning Unix utilities, serialization, bioinformatics, interpreters, static analysis, cryptography, compression, configuration languages. Preliminary results focused on four: choose (string manipulation) and cal (calendar) at near-100%; gotree at 99.95%; Pkl (a configuration language) at 35% (256/733). Same model, very different cross-domain stability.",
+      "The benchmark's design is more interesting than the single score. Coding benchmarks scaled from HumanEval (under 100 lines per problem) through SWE-bench (tens of lines per issue) — but stayed 'patch-shaped.' MirrorCode is the first to cross the 'longer than you can read over lunch' threshold; the model has to hold consistency across thousands of interdependent functions and decide for itself where to start.",
+      "Until now, 'when can AI sustain weeks of work' lived in projections. METR's autonomy-duration estimates relied on interviews and reverse inference; Epoch's curves built on extrapolation. MirrorCode is the first concrete, reproducible datapoint: a real program, a real test suite, a quantifiable pass rate — not a timeline.",
+      "Reproducibility is the work's core open question. METR/Epoch use a 'dual test' mechanism — each visible test has a hidden equivalent variant (same logic, different values) to detect hard-coding. Their phrasing: 'the AI's solutions are not hard-coded.' The mechanism itself has split the community: some see it as necessary defense against training-data contamination, others worry it makes the result hard to reproduce externally.",
+      "The authors' own limitations are equally restrained. They acknowledge three: MirrorCode requires a 'precise, programmatically checkable specification,' which real software rarely has; the test set may be contaminated in future training; the covered software domains are limited. Their conclusion: 'our findings may not translate directly to typical software development practices' — the boundary stated by the researchers themselves.",
+      "Read alongside Volume 6 (Harness Engineering), the convergence is clear: the metric for 2026 isn't single-instruction win rate but stability across long chains, many files, multiple objectives. 'Full-stack code' enters the benchmark dimension for the first time — meaning every release note from now on owes a number on this axis.",
+      "For toolchain teams, MirrorCode is a sobering reminder: your everyday code agent has a measurable gap from the capability curve in the benchmark. Acknowledging the gap is more useful for engineering than rhetorically closing it. The week MirrorCode dropped, timeline-watchers and skeptics finally had the same artifact to argue from — that's worth recording, more than any single number."
     ],
     sources: [
-      { label: "METR · MirrorCode", url: "https://metr.org/blog/2026-04-10-mirrorcode-preliminary-results/" },
-      { label: "Epoch AI", url: "https://epoch.ai/blog/mirrorcode-preliminary-results" },
-      { label: "GitHub · MirrorCode-data", url: "https://github.com/epoch-research/MirrorCode-data" }
+      { label: "METR · MirrorCode preliminary results", url: "https://metr.org/blog/2026-04-10-mirrorcode-preliminary-results/" },
+      { label: "Epoch AI · MirrorCode benchmark blog", url: "https://epoch.ai/blog/mirrorcode-preliminary-results" },
+      { label: "Import AI · MirrorCode coverage (Issue 453)", url: "https://importai.substack.com/p/import-ai-453-breaking-ai-agents" },
+      { label: "Zen van Riel · weeks-long coding tasks analysis", url: "https://zenvanriel.com/ai-engineer-blog/mirrorcode-benchmark-ai-weeks-long-coding-tasks/" },
+      { label: "AgentWiki · MirrorCode entry", url: "https://agentwiki.org/mirrorcode" }
     ]
   },
   {
