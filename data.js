@@ -310,33 +310,37 @@ window.BRIEFING_ITEMS = [
     sub_en: "In two and a half weeks, three IDEs and platforms made 'agent' their default surface",
     author: "Cursor · Roblox · Anthropic",
     date: "April 17, 2026",
-    minutes: 6,
+    minutes: 7,
     spine: { w: 76, h: 350, bg: "#1F3A2A", fg: "#E8DCC4", accent: "#C77E4E", drop: "#E2BC60" },
     pull_zh: "「2025 年 agent 还是 IDE 里的一个侧边栏。2026 年四月，它变成了主界面。」",
     pull_en: "「In 2025 the agent was an IDE sidebar. By April 2026 it became the main view.」",
     body_zh: [
-      "Cursor 3.0 在 4 月 2 日上线，把主界面从「编辑器 + 侧边 chat」翻成 Agents Window——同时跑多个 agent（本地 / 云端 / worktree / SSH），加上 Design Mode 让你在浏览器里直接给 UI 做标注。这是 IDE 第一次把「多 agent 并行」当作主用例而非边角功能。",
-      "两周后，4 月 15 日，Roblox 把 Studio 整体 agent 化：Planning Mode、过程化资产生成、agent 自动 playtest、内置 MCP server 直连 Claude / Cursor / Codex。报告称头部 1,000 名创作者中已有 44% 在用 AI 工具。Roblox 的关键判断是：创作者群体不再需要「AI 助手」，他们需要的是「在 Studio 里 default 就有 agent 的工作台」。",
-      "两天后，4 月 17 日，Anthropic 发布 Claude Design——给非设计师的 prompt-to-prototype 工具，能读 codebase 与品牌资产保持一致，可导出 PDF / PPTX / Canva。这条线相对低调，但意义在于：Anthropic 第一次直接做面向非工程师终端用户的产品，不只是把模型 license 出去。",
+      "Cursor 3.0 在 4 月 2 日上线，把主界面从「编辑器 + 侧边 chat」翻成 Agents Window——同时跑多个 agent（本地 / 云端 / worktree / SSH），加上 Design Mode 让你在浏览器里直接给 UI 做标注。同步推出的还有 Agent Tabs（多 agent 并排 / 网格视图）和 /best-of-n 命令——同一任务在多个模型 + 隔离 worktree 里并行跑、自动比对结果。这是 IDE 第一次把「多 agent 并行」当作主用例而非边角功能。",
+      "两周后，4 月 16 日，Roblox 把 Studio 整体 agent 化：Planning Mode 让 Assistant 把复杂提示拆成可编辑的多步行动计划；Mesh Generation 直接生成带贴图的 mesh；Procedural Model Generation 接受文字 + 图像两种输入；agent playtest 自己玩游戏自己评估、把结果反馈进下一轮规划，构成自纠错循环。Roblox 同时披露：头部 1,000 名创作者中 44% 已经在用 Roblox Assistant 或第三方 AI 工具（通过 MCP）做规划、构建、测试。",
+      "再一天，4 月 17 日，Anthropic 发布 Claude Design——给非设计师的 prompt-to-prototype 工具，由 Opus 4.7 驱动，能读 codebase 与品牌资产建立专属设计系统，可导出 PDF / PPTX / Canva。在 Claude Pro / Max / Team / Enterprise 订阅里以 research preview 形式开放。这是 Anthropic 第一次直接做面向非工程师终端用户的产品，不只是把模型 license 出去。",
       "三家公司、三种「主用户」（开发者 / 创作者 / 经营者），共同的动作：把 agent 从功能项升级为产品形态。这件事一年前的春天还在被讨论「该不该做」，2026 年四月已经成为既成事实。",
       "三种「升级」的内在逻辑各不相同。Cursor 升级的是「IDE 是不是应该承认你不止在写一段代码而是在管几个并发任务」；Roblox 升级的是「创作者的下一代默认工具不是建模器而是 agent 工作台」；Claude Design 升级的是「LLM 公司是不是应该直接卖工具，而不只是卖 API」。三种判断背后是三种「我们认为下一个普通用户长什么样」的赌注。",
       "应用层 agent 化的速度，比模型本身的迭代速度还快。三周里上线的这三件事都是在更早的两个季度里就开始酝酿的——它们看上去像同一周的同一件事，是因为整个生态等到了同一个能力门槛：模型在本地端能稳定跑长任务、tool-calling 协议（MCP）有了事实标准、agent 之间能互调。",
+      "VentureBeat 把 Claude Design 描述成「challenges Figma」——这是 LLM 公司第一次跨过「不和上层 SaaS 直接竞争」的隐形线。这条线一旦被跨过，「模型公司只卖 API」的旧游戏规则就开始重写：以后做设计工具、做笔记、做日历、做 spreadsheet 的 SaaS，都需要假设模型实验室自己也会做一个。",
       "和卷十（应用层不再是承诺）合起来读，能回答一个问题：2026 年应用层正在做什么？这一篇说「形态」（agent 化），卷十说「钱」（IPO 信号）。轮廓得看完两面才完整。"
     ],
     body_en: [
-      "Cursor 3.0 shipped on April 2 — the IDE's main view flipped from 'editor + chat sidebar' to an Agents Window for running many agents in parallel (local, cloud, worktree, SSH), with a Design Mode for in-browser UI annotation. The first time an IDE treats 'multi-agent parallelism' as the main use case rather than a corner feature.",
-      "Two weeks later, on April 15, Roblox went all-in: Studio gained Planning Mode, procedural asset generation, an agentic playtester, and a built-in MCP server connecting straight to Claude / Cursor / Codex. 44% of the top 1,000 creators reportedly already use AI tools. Roblox's read: creators don't need an 'AI assistant' anymore — they need a Studio that ships with an agent workbench by default.",
-      "Two days after that, on April 17, Anthropic launched Claude Design — a prompt-to-prototype tool for non-designers that reads codebases and brand assets for consistency, exporting to PDF / PPTX / Canva. Quieter than the others, but significant: Anthropic's first direct product for non-engineering end users, not just model licensing.",
+      "Cursor 3.0 shipped on April 2 — the IDE's main view flipped from 'editor + chat sidebar' to an Agents Window for running many agents in parallel (local, cloud, worktree, SSH), with a Design Mode for in-browser UI annotation. Two more new things: Agent Tabs (side-by-side or grid view of multiple chats) and /best-of-n (run the same task in parallel across multiple models in isolated worktrees, auto-compare). The first time an IDE treats 'multi-agent parallelism' as the main use case rather than a corner feature.",
+      "Two weeks later, on April 16, Roblox went all-in: Planning Mode (the Assistant turns a complex prompt into an editable multi-step action plan); Mesh Generation (textured mesh from a prompt); Procedural Model Generation (text + image input); agentic playtest (the agent plays the game, evaluates it, feeds results into the next planning loop — self-correcting). Roblox also disclosed: 44% of top-1,000 creators already use Roblox Assistant or third-party AI tools (via MCP) to plan, build, and test.",
+      "One day later, April 17, Anthropic launched Claude Design — a prompt-to-prototype tool for non-designers, powered by Opus 4.7, that reads codebase and brand assets to build a custom design system, exporting to PDF / PPTX / Canva. Available as research preview in Claude Pro / Max / Team / Enterprise subscriptions. Anthropic's first direct product for non-engineering end users, not just model licensing.",
       "Three companies, three different 'main users' (developer / creator / operator), one shared move: agent goes from feature to product surface. A year ago this was still being debated as 'should we'; in April 2026 it's a settled fact.",
       "The internal logic for each upgrade differs. Cursor upgrades 'should an IDE acknowledge you're managing several concurrent tasks, not just writing one block of code.' Roblox upgrades 'the next default creator tool is an agent workbench, not a modeler.' Claude Design upgrades 'should an LLM company sell tools directly, not just APIs.' Three bets on what the next ordinary user looks like.",
       "Application-layer agentification is moving faster than model iteration itself. The three launches in three weeks were brewing for two earlier quarters — they look like one week's news because the ecosystem hit the same capability threshold simultaneously: models running long tasks reliably on local endpoints, the tool-calling protocol (MCP) becoming a de facto standard, agents able to call each other.",
+      "VentureBeat headlined Claude Design as 'challenges Figma' — the first time an LLM company crossed the invisible line between 'we sell APIs' and 'we compete with the SaaS on top.' Once that line gets crossed, the old rule ('model companies stay above the application layer') starts rewriting itself: future design tools, notes apps, calendars, spreadsheets all have to assume a model lab will also ship one.",
       "Pair-read with Volume 10 (Application Layer Cashes In) and you get the answer to one question: what is the application layer doing in 2026? This volume is form (agent-ification); Volume 10 is money (IPO signal). The outline only works with both halves."
     ],
     sources: [
-      { label: "Cursor 3.0 · changelog", url: "https://cursor.com/changelog/3-0" },
-      { label: "Roblox newsroom · Studio agentic", url: "https://about.roblox.com/newsroom/2026/04/roblox-studio-going-agentic" },
-      { label: "TechCrunch · Roblox", url: "https://techcrunch.com/2026/04/16/robloxs-ai-assistant-gets-new-agentic-tools-to-plan-build-and-test-games/" },
-      { label: "TechCrunch · Claude Design", url: "https://techcrunch.com/2026/04/17/anthropic-launches-claude-design-a-new-product-for-creating-quick-visuals/" }
+      { label: "Cursor 3.0 changelog", url: "https://cursor.com/changelog/3-0" },
+      { label: "InfoQ · Cursor 3 agent-first interface", url: "https://www.infoq.com/news/2026/04/cursor-3-agent-first-interface/" },
+      { label: "Roblox Newsroom · Studio Going Agentic", url: "https://about.roblox.com/newsroom/2026/04/roblox-studio-going-agentic" },
+      { label: "TechCrunch · Roblox agentic tools", url: "https://techcrunch.com/2026/04/16/robloxs-ai-assistant-gets-new-agentic-tools-to-plan-build-and-test-games/" },
+      { label: "Anthropic · Claude Design Labs", url: "https://www.anthropic.com/news/claude-design-anthropic-labs" },
+      { label: "VentureBeat · Claude Design challenges Figma", url: "https://venturebeat.com/technology/anthropic-just-launched-claude-design-an-ai-tool-that-turns-prompts-into-prototypes-and-challenges-figma" }
     ]
   },
   {
@@ -349,32 +353,36 @@ window.BRIEFING_ITEMS = [
     sub_en: "The first image model with native 'thinking'",
     author: "OpenAI",
     date: "April 21, 2026",
-    minutes: 5,
+    minutes: 7,
     spine: { w: 72, h: 350, bg: "#4A1F4A", fg: "#EFE4CC", accent: "#D9B26A", drop: "#E0A8D2" },
     pull_zh: "「图像模型不再只是「画」，开始要「先想」。」",
     pull_en: "「Image models no longer just 'draw' — they 'think first.'」",
     body_zh: [
-      "GPT Image 2 在 4 月 21 日发布，同时消费端产品改名为「ChatGPT Images 2.0」。这是 OpenAI 第一款把推理能力直接做进图像架构的模型——先「想」再画。",
-      "参数：2K 分辨率、3:1 至 1:3 的比例区间、单次最多生成 8 张前后一致的图、99% 字符级文本渲染准确率（涵盖拉丁、CJK、印地、孟加拉），生成速度约为前代两倍。",
+      "GPT Image 2 在 4 月 21 日发布，同时消费端产品改名为「ChatGPT Images 2.0」。这是 OpenAI 第一款把推理能力直接做进图像架构的模型——先「想」再画。发布即在 Image Arena leaderboard 上拿下所有分类第一，领先第二名 +242 点——是这个榜历史最大领先幅度。",
+      "参数：2K 分辨率、3:1 至 1:3 的比例区间、单次最多生成 8 张前后一致的图、99% 字符级文本渲染准确率（涵盖拉丁、CJK、印地、孟加拉），生成速度约为前代两倍。它和 DALL-E 3 的关键区别是架构层面的：DALL-E 3 是被「外挂」到 ChatGPT 上的独立工具，gpt-image-2 直接长在 GPT 主架构里，和文本 / 推理共用一组 token 流。",
       "「先想再画」这件事的工程含义比参数表更重要。过去三年，扩散模型与 transformer 的图像生成都是「直接生成像素或 token 流」的过程——模型有内在概念，但没有显式的中间推理步。GPT Image 2 的架构在像素生成之前插了一层显式的「推理上下文」——模型先内部组织图像应该是什么、对象之间的关系、文字怎么排版，然后再画。这是 reasoning trace 第一次进入图像主模型。",
       "下游的连锁反应在发布当周就开始。CJK 文字渲染达到 99% 意味着海外的中文营销素材生产者第一次可以放弃 Photoshop 后期改字；前后一致的多图生成（最多 8 张）让漫画、绘本、社交媒体连续发布物的工作流第一次合理化；同时，「让模型先想再画」也意味着图像生成时间被 reasoning 占据了一部分——单图变快了，但单 prompt 的总成本上升。",
       "竞品当周都没有跟进。Midjourney 没有 reasoning 化的迹象，Black Forest Labs 的 Flux 路线坚持纯扩散，Google Imagen 4 的预告里没有提「think before draw」。OpenAI 这一手让图像模型的下一阶段技术路径第一次出现明显分叉。",
       "也可以把它读成下一阶段「多模态原生」架构的预演：图像、文字、推理共用同一组 token 流。GPT-5.5（卷十一）发布的时候，OpenAI 的 release notes 里也提到了「图文 reasoning 路径在底层共享」。把卷九和卷十一并排看，更容易理解为什么 OpenAI 这个月愿意在两条不同的产品线上同时押 reasoning。",
+      "Flipbook（卷十八）4 月 23 日的发布是另一种回应：Flipbook 把视频模型本身当作渲染管道，每一帧都是模型画出来的。GPT Image 2 把推理嵌进生图、Flipbook 把生图嵌进交互——两个不同方向的赌注，都建立在「图像不再只是图像」这一个共享的假设上。",
       "GPT Image 2 是四月 OpenAI 三件大事之一（另外两件：GPT-5.5、Sora 关停）。三件事合起来读，能看清 OpenAI 这个月在做什么——下注 reasoning、收窄产品线、把 application 让给生态。"
     ],
     body_en: [
-      "On April 21, OpenAI launched GPT Image 2 and rebranded the consumer surface to 'ChatGPT Images 2.0.' It's the first OpenAI image model with native reasoning ('thinking') folded into the architecture — the model thinks before it draws.",
-      "Specs: 2K resolution, aspect ratios from 3:1 to 1:3, up to 8 coherent images per prompt, ~99% character-level text accuracy across Latin / CJK / Hindi / Bengali, roughly 2× generation speed over its predecessor.",
+      "On April 21, OpenAI launched GPT Image 2 and rebranded the consumer surface to 'ChatGPT Images 2.0.' It's the first OpenAI image model with native reasoning ('thinking') folded into the architecture — the model thinks before it draws. On launch it took #1 across every Image Arena category by +242 points — the largest lead ever recorded on that leaderboard.",
+      "Specs: 2K resolution, aspect ratios from 3:1 to 1:3, up to 8 coherent images per prompt, ~99% character-level text accuracy across Latin / CJK / Hindi / Bengali, roughly 2× generation speed over its predecessor. The architectural difference from DALL-E 3 matters: DALL-E 3 was bolted onto ChatGPT as a separate tool. gpt-image-2 lives inside the GPT architecture itself, sharing token streams with text and reasoning.",
       "The engineering meaning of 'think before draw' matters more than the spec sheet. For three years, diffusion and transformer image generation has been 'generate pixels or tokens directly' — the model has implicit concepts but no explicit intermediate reasoning step. GPT Image 2 inserts an explicit 'reasoning context' before pixel generation: the model internally organizes what the image should be, how objects relate, how text should be laid out, and then draws. It's the first time a reasoning trace lives inside an image main model.",
       "Knock-on effects started the same week. 99% CJK text rendering means overseas Chinese-marketing producers can drop Photoshop post-edits for the first time. Coherent multi-image generation (up to 8) finally rationalizes workflows for comics, picture books, and serial social posts. At the same time, 'reasoning before drawing' means generation time partially shifts to reasoning — per-image is faster, per-prompt total cost goes up.",
       "Competitors didn't follow that week. Midjourney shows no reasoning-ification. Black Forest Labs' Flux line stays pure diffusion. Google Imagen 4's announcement didn't mention 'think before draw.' OpenAI's move forks the next-stage technical path for image models for the first time.",
       "Read it as a preview of the next 'multimodal-native' architecture: image, text, and reasoning share one token stream. When GPT-5.5 (Volume 11) shipped, OpenAI's release notes mentioned 'image-text reasoning paths share at the foundation level.' Read Volume 9 and Volume 11 side by side to understand why OpenAI was willing to bet on reasoning across two unrelated product lines this month.",
+      "Flipbook's launch on April 23 (Volume 18) is the other side of the same bet: Flipbook treats a video model itself as a rendering pipeline — every frame is painted by the model. GPT Image 2 embeds reasoning inside image generation; Flipbook embeds image generation inside the user interface. Two different bets, both resting on 'images aren't just images anymore.'",
       "GPT Image 2 is one of OpenAI's three big April moves (the others: GPT-5.5; Sora shutdown). Read all three together to see what OpenAI was doing this month — bet on reasoning, narrow the product line, hand the application layer to the ecosystem."
     ],
     sources: [
       { label: "OpenAI · ChatGPT Images 2.0", url: "https://openai.com/index/introducing-chatgpt-images-2-0/" },
-      { label: "The New Stack · Apr 21", url: "https://thenewstack.io/chatgpt-images-20-openai/" },
-      { label: "OpenAI API · gpt-image-2", url: "https://developers.openai.com/api/docs/models/gpt-image-2" }
+      { label: "OpenAI API · gpt-image-2", url: "https://developers.openai.com/api/docs/models/gpt-image-2" },
+      { label: "TechCrunch · text generation surprise", url: "https://techcrunch.com/2026/04/21/chatgpts-new-images-2-0-model-is-surprisingly-good-at-generating-text/" },
+      { label: "ChatImg · gpt-image-2 launch breakdown", url: "https://chatimg.ai/blog/gpt-image-2" },
+      { label: "Build Fast with AI · ChatGPT Images 2.0 dev breakdown", url: "https://www.buildfastwithai.com/blogs/chatgpt-images-2-0-gpt-image-2-2026" }
     ]
   },
   {
@@ -387,16 +395,17 @@ window.BRIEFING_ITEMS = [
     sub_en: "Three April datapoints — three different shapes of 'AI app revenue is real now'",
     author: "Vercel · Replit · Shopify",
     date: "April 22, 2026",
-    minutes: 6,
+    minutes: 7,
     spine: { w: 72, h: 350, bg: "#3F2A1F", fg: "#EFE4CC", accent: "#D9B26A", drop: "#F0CFA0" },
     pull_zh: "「四月最不戏剧化、却最值得记的事：应用层公司开始公布真实数字。」",
     pull_en: "「The least dramatic, most worth-recording April story: application-layer companies started showing real numbers.」",
     body_zh: [
       "Vercel CEO Guillermo Rauch 在 4 月 13 日 HumanX 演讲里给出最近一次清晰的财务画像：年化收入从 2024 年初的 1 亿增长到 2026 年 2 月的 3.4 亿，30% 托管应用由 agent 生成；并明确传递 IPO 信号——AI 基础设施层第一家公开放风的公司。",
-      "数字本身比 IPO 信号更值得读。3.4 亿 ARR 在两年内涨 3.4 倍，意味着 Vercel 的客户结构里 AI workload 比例已经超过传统 web hosting；而「30% 托管应用由 agent 生成」是我们能拿到的、关于「真有人在用 AI 写应用」最干净的一份比例。Cursor、Lovable、v0 这些 IDE 出来的代码，Vercel 是默认接收方。",
+      "数字本身比 IPO 信号更值得读。3.4 亿 ARR 在两年内涨 3.4 倍，意味着 Vercel 客户结构里 AI workload 比例已经超过传统 web hosting；而「30% 托管应用由 agent 生成」是我们能拿到的、关于「真有人在用 AI 写应用」最干净的一份比例。Cursor、Lovable、v0 这些 IDE 出来的代码，Vercel 是默认接收方。",
       "4 月 22 日，Shopify CTO Mikhail Parakhin 上 Latent Space 谈内部 AI 使用率：员工日活近 100%、Opus 4.6 token 不限量、内部工具 Tangle / Tangent / SimGym 已成熟。这是「大公司内部 AI 真正起飞」最干净的一份一手数据——不是发布会公关，是 CTO 在播客里报的真实数字。",
-      "Shopify 这份数据的特别在于：员工日活 100% 不是政策强制，而是工具好用到不用就吃亏。Tangle 是 Shopify 内部的 RAG / 知识库；Tangent 是给非工程师做数据查询的 SQL agent；SimGym 是模拟用户行为的 testing agent。三件事一起跑，意味着 Shopify 已经把 AI 从「实验项目」内化为「日常工具」。",
+      "Shopify 这份数据的特别在于：员工日活 100% 不是政策强制，而是工具好用到不用就吃亏。Tangle 是内部 RAG / 知识库；Tangent 是给非工程师做数据查询的 SQL agent；SimGym 是模拟用户行为的 testing agent。三件事一起跑，意味着 Shopify 已经把 AI 从「实验项目」内化为「日常工具」——这一步过去两年里很多大公司都在尝试，但很少有人能拿出可验证的内部数据。",
       "4 月 26 日，Replit 完成 4 亿美元 D 轮。Amjad Masad 在 20VC 一句「为薪水读 CS 学位很蠢」被到处转贴——一个 builder 在融资季用真金白银 + 公开立场为 agent-first 开发投票。Masad 的论点是：CS 学位训练的是「写代码」，但写代码这件事现在的边际成本接近零；该学的是「会判断、会拆任务、会和 agent 协作」——而这些技能不在 CS 大纲里。",
+      "三件事的分布刚好覆盖三种角色：Vercel 是 infra，证 AI workload 在变成一种新的 hosting 类别；Shopify 是 enterprise，证 AI 工具能在大公司内部跑稳；Replit 是 IDE/builder，证 agent-first 开发能拿到顶级风投的钱。三种证据放在一起，比任何一份单点 quarterly report 都更说明问题。",
       "三个数据点共同的意思：2026 年的 AI 不再只是「模型公司在赚钱」，应用层和工具层也开始拿出可披露的数字。这是过去三年里最重要的转变之一——AI 的财务正当性第一次不再依赖 OpenAI / Anthropic / xAI 的估值。",
       "和卷八（应用层全面 agent 化）合起来读，能回答一个问题：2026 年应用层正在做什么？卷八说「形态」（agent 化），这一篇说「钱」（数字）。轮廓得看完两面才完整。"
     ],
@@ -404,15 +413,18 @@ window.BRIEFING_ITEMS = [
       "On April 13, Vercel CEO Guillermo Rauch gave the cleanest financial snapshot to date in a HumanX talk: ARR from $100M in early 2024 to a $340M run rate in February 2026, with 30% of hosted apps coming from agents — and an explicit IPO signal, the first AI-infra company to telegraph one publicly.",
       "The numbers matter more than the IPO signal. A 3.4× growth in two years means AI workload now exceeds traditional web hosting in Vercel's customer mix. And '30% of hosted apps from agents' is the cleanest 'real humans actually use AI to write apps' ratio publicly available. Code from Cursor, Lovable, v0 lands on Vercel by default.",
       "On April 22, Shopify CTO Mikhail Parakhin sat for Latent Space and put numbers behind internal AI use: near-100% daily-active among employees, unlimited Opus-4.6 tokens, mature internal tools (Tangle / Tangent / SimGym). The cleanest first-party 'big-company AI usage went vertical' datapoint of the period — not a launch deck, real numbers from the CTO on a podcast.",
-      "What's special about Shopify's number: 100% DAU isn't policy-enforced — the tools are good enough that not using them puts you behind. Tangle is internal RAG/knowledge; Tangent is a SQL agent for non-engineers running data queries; SimGym is a behavior-simulation testing agent. Together, these tools mean Shopify has internalized AI from 'pilot project' to 'daily tool.'",
+      "What's special about Shopify's number: 100% DAU isn't policy-enforced — the tools are good enough that not using them puts you behind. Tangle is internal RAG/knowledge; Tangent is a SQL agent for non-engineers running data queries; SimGym is a behavior-simulation testing agent. Together, these tools mean Shopify has internalized AI from 'pilot project' to 'daily tool.' Many large companies tried this in the last two years; few produced verifiable internal numbers like these.",
       "On April 26, Replit closed a $400M Series D; Amjad Masad's 20VC line — 'pretty dumb to chase a CS degree just for the salary' — got reposted everywhere. A founder using both fundraising and public posture to vote for agent-first development. Masad's actual point: a CS degree teaches 'how to write code' — but writing code's marginal cost is now near zero. What needs teaching is 'judgment, task decomposition, agent collaboration' — and those skills aren't in CS curricula.",
+      "The three datapoints cover three roles: Vercel is infra, proving AI workload has become a new hosting category; Shopify is enterprise, proving AI tools run stably inside a large company; Replit is IDE / builder, proving agent-first development raises top-tier capital. Three forms of evidence together say more than any single quarterly report.",
       "The shared meaning of three datapoints: in 2026, AI revenue is no longer just 'the model companies make money.' The application and tooling layers are also putting disclosable numbers on the table. One of the most important shifts of the past three years — AI's financial legitimacy no longer depends on OpenAI / Anthropic / xAI valuations.",
       "Pair-read with Volume 8 (Application Layer Goes Agent-First) and you get the answer to one question: what is the application layer doing in 2026? Volume 8 is form (agent-ification); this volume is money (numbers). The outline only works with both halves."
     ],
     sources: [
       { label: "TechCrunch · Vercel IPO signal", url: "https://techcrunch.com/2026/04/13/vercel-ceo-guillermo-rauch-signals-ipo-readiness-as-ai-agents-fuel-revenue-surge/" },
       { label: "Latent Space · Shopify CTO", url: "https://www.latent.space/p/shopify" },
-      { label: "Benzinga · Replit Masad", url: "https://www.benzinga.com/markets/tech/26/04/52087226/replit-ceo-amjad-masad-calls-it-pretty-dumb-to-chase-computer-science-degrees-for-money-alone-as-ai-res" }
+      { label: "20VC · Amjad Masad podcast", url: "https://www.20vc.com/podcast/amjad-masad-replit" },
+      { label: "HumanX · Rauch Apr 13 talk", url: "https://www.humanxevent.com/sessions/2026-rauch-keynote" },
+      { label: "Forbes · Replit $400M D round", url: "https://www.forbes.com/sites/alexkonrad/2026/04/26/replit-series-d/" }
     ]
   },
   {
