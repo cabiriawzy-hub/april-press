@@ -22,4 +22,5 @@ window.COVER_ASSETS = {
   "vol-15": "covers/vol-15.png",
   "vol-16": "covers/vol-16.png",
   "vol-17": "covers/vol-17.png",
+  "vol-18": "covers/vol-18.png",
 };
