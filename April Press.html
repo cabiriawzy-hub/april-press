@@ -1191,7 +1191,10 @@ function App() {
           <span>{lang === "zh" ? "二〇二六年四月" : "APRIL 2026"}</span>
         </div>
         <h1 className="mh-title">
-          AI <span className="ampersand">&amp;</span> <em>Slow Read</em>
+          {lang === "zh"
+            ? <>AI<span className="ampersand"> · </span>慢读月刊</>
+            : <>AI <span className="ampersand">&amp;</span> <em>Slow Read</em></>
+          }
         </h1>
         <div className="mh-sub">{T.sub}</div>
       </header>
