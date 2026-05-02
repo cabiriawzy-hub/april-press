@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>四月 AI 简报 · April Press</title>
+  <title>AI 慢读月刊 · Vol 26.04</title>
   <script>document.write('<link rel="stylesheet" href="styles.css?v='+Date.now()+'" />')</script>
 </head>
 <body>
@@ -346,12 +346,12 @@ function makeBackTexture(item) {
   g.beginPath();
   g.arc(70, H - 80, 8, 0, Math.PI * 2);
   g.fill();
-  // April Press tag
+  // Imprint tag (back cover stamp; ASCII only — JetBrains Mono can't render CJK)
   g.fillStyle = item.spine.fg;
   g.globalAlpha = 0.55;
   g.font = '400 18px "JetBrains Mono", monospace';
   g.textAlign = "left";
-  g.fillText("APRIL PRESS · No. " + item.no, 110, H - 75);
+  g.fillText("SLOW READ · No. " + item.no, 110, H - 75);
   g.globalAlpha = 1;
   return new window.THREE.CanvasTexture(c);
 }
@@ -748,7 +748,7 @@ function VolumeSection({ item, lang, t, isLast, registerRef, coverSrc }) {
     <section className="vol-section" ref={ref} data-vol={item.id} data-vol-no={item.no}
       style={{ "--drop": item.spine.drop || "var(--accent)" }}>
       <div className="vol-header">
-        <span className="vol-meta">April Press · {t.vol} {item.no} / {String(ITEMS.length).padStart(2, "0")} · {t.readMin(item.minutes)}</span>
+        <span className="vol-meta">{lang === "zh" ? "AI 慢读月刊" : "AI Slow Read"} · {t.vol} {item.no} / {String(ITEMS.length).padStart(2, "0")} · {t.readMin(item.minutes)}</span>
       </div>
       <div className="detail-spread">
         <div className="detail-left">
@@ -778,7 +778,7 @@ function VolumeSection({ item, lang, t, isLast, registerRef, coverSrc }) {
           )}
           <div className="dr-foot">
             <span>{t.end}</span>
-            <span>April Press · No. {item.no}</span>
+            <span>{lang === "zh" ? "AI 慢读月刊" : "AI Slow Read"} · No. {item.no}</span>
           </div>
         </div>
       </div>
@@ -1020,7 +1020,7 @@ function Detail({ items, openId, lang, coverMap, onClose, onActiveChange, theme,
       </div>
 
       <div className="detail-top-fixed">
-        <span className="dt-meta">April Press · {t.vol} {activeItem.no} / {String(items.length).padStart(2, "0")}</span>
+        <span className="dt-meta">{lang === "zh" ? "AI 慢读月刊" : "AI Slow Read"} · {t.vol} {activeItem.no} / {String(items.length).padStart(2, "0")}</span>
         <div className="dt-filters">
           {Object.keys(CATS).map(k => {
             const n = counts[k] || 0;
@@ -1136,23 +1136,23 @@ function App() {
   const setTheme = (Th) => setTweak("theme", Th);
 
   const T = lang === "zh"
-    ? { topLeft: "April Press", issue: "Vol. 18 · 二〇二六年四月",
-        eyebrow: "卷 一八", title1: "四月", title2: "AI 简报",
+    ? { topLeft: "AI 慢读月刊", issue: "Vol 26.04",
+        eyebrow: "Vol 26.04", title1: "AI", title2: "慢读月刊",
         sub: "四月，AI 的工程重心第一次明确从模型本身，移到了模型外那一层。",
         editor: "本期 " + ITEMS.length + " 篇，写在四月——一个节奏太密、需要慢读的月份。模型按周发布、harness 自成学科、开源同月被拆成三种立场、OpenAI 第一次像在做减法。每一篇单独看是新闻；合起来看，是 2026 年 AI 工程在朝哪个方向收敛。",
-        col1: "April Press · 编辑独立选编。",
+        col1: "AI 慢读月刊 · 编辑独立选编。",
         col2: "Set in Newsreader & Noto Serif。",
-        col3: "Vol. 18 · 2026 年 4 月 30 日付印。",
+        col3: "Vol 26.04 · 2026 年 4 月 30 日付印。",
         themeLabel: "主题",
         themes: { ink: "深墨", paper: "米白", navy: "海军" },
       }
-    : { topLeft: "April Press", issue: "Vol. 18 · April 2026",
-        eyebrow: "Volume 18", title1: "April", title2: "AI Briefing",
+    : { topLeft: "AI Slow Read", issue: "Vol 26.04",
+        eyebrow: "VOL 26.04", title1: "AI", title2: "Slow Read",
         sub: "In April, AI's engineering center of gravity moved — clearly, for the first time — from the model itself to the layer around it.",
         editor: "" + ITEMS.length + " pieces from April — a month dense enough that it has to be read slowly. Models shipped weekly, harness became a discipline, open-source split three ways in a single month, and OpenAI looked, for the first time, like it was subtracting. Each piece on its own is news; read together, they're the direction AI engineering is settling toward in 2026.",
-        col1: "April Press is independently edited.",
+        col1: "AI Slow Read is independently edited.",
         col2: "Set in Newsreader & JetBrains Mono.",
-        col3: "Vol. 18 · went to press April 30, 2026.",
+        col3: "Vol 26.04 · went to press April 30, 2026.",
         themeLabel: "Theme",
         themes: { ink: "Ink", paper: "Paper", navy: "Navy" },
       };
@@ -1192,8 +1192,8 @@ function App() {
         </div>
         <h1 className="mh-title">
           {lang === "zh"
-            ? <>四月<span className="ampersand"> · </span>AI 简报</>
-            : <>{T.title1} <span className="ampersand">&amp;</span> <em>{T.title2}</em></>
+            ? <>AI<span className="ampersand"> · </span>慢读月刊</>
+            : <>AI <span className="ampersand">&amp;</span> <em>Slow Read</em></>
           }
         </h1>
         <div className="mh-sub">{T.sub}</div>
