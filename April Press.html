@@ -1080,6 +1080,7 @@ function App() {
 
   const [filter, setFilter] = useState("all");
   const [openId, setOpenId] = useState(null);
+  const [subOpen, setSubOpen] = useState(false);
   const [coverMap, setCoverMap] = useState(() => ({ ...(window.COVER_ASSETS || {}) }));
 
   useEffect(() => {
@@ -1179,6 +1180,7 @@ function App() {
             <button className={lang === "zh" ? "active" : ""} onClick={() => setLang("zh")} title="中文" aria-label="中文">文</button>
             <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} title="English" aria-label="English">A</button>
           </div>
+          <button className="sub-btn" onClick={() => setSubOpen(true)}>{lang === "zh" ? "订阅" : "Subscribe"}</button>
         </div>
       </div>
 
@@ -1223,11 +1225,51 @@ function App() {
         </div>
       </section>
 
-      <footer className="colophon">
-        <div>{T.col1}</div>
-        <div className="center">{T.col2}</div>
-        <div className="right">{T.col3}</div>
+      <footer className="site-foot">
+        <div className="sf-mast" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <span className="sf-the">{lang === "zh" ? "AI 慢读 · 创刊于 2026" : "AI Slow Read · Since 2026"}</span>
+          <span className="sf-wm">April<span className="amp">&amp;</span>Press</span>
+        </div>
+        <div className="sf-grid">
+          <div className="sf-col">
+            <h4>{lang === "zh" ? "栏目" : "Sections"}</h4>
+            <ul>
+              {["essay","product","research","industry","open-source"].map(k => (
+                <li key={k}><a onClick={() => { setFilter(k); document.querySelector(".filters") && document.querySelector(".filters").scrollIntoView({ behavior: "smooth", block: "start" }); }}>{categoryLabel(k, lang)}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div className="sf-col">
+            <h4>{lang === "zh" ? "阅读" : "Read"}</h4>
+            <ul>
+              <li><a onClick={() => { document.querySelector(".editors") && document.querySelector(".editors").scrollIntoView({ behavior: "smooth", block: "start" }); }}>{lang === "zh" ? "卷首导读" : "Editor's letter"}</a></li>
+            </ul>
+          </div>
+          <div className="sf-col">
+            <h4>{lang === "zh" ? "关于" : "About"}</h4>
+            <ul>
+              <li><a onClick={() => { document.querySelector(".editors") && document.querySelector(".editors").scrollIntoView({ behavior: "smooth", block: "start" }); }}>{lang === "zh" ? "关于本刊" : "About"}</a></li>
+            </ul>
+          </div>
+          <div className="sf-col">
+            <h4>{lang === "zh" ? "订阅" : "Subscribe"}</h4>
+            <ul>
+              <li><a onClick={() => setSubOpen(true)}>{lang === "zh" ? "如何订阅" : "How to subscribe"}</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="sf-bottom">
+          <p className="sf-copy">{lang === "zh"
+            ? <>© 2026 <em>AI 慢读</em> 保留所有权利。AI 慢读是一份每月一期的 AI 行业档案刊物。内容由多模型协作撰写、@Zhiyi Wang 审校。</>
+            : <>© 2026 <em>AI Slow Read</em>. All rights reserved. A monthly archive of the AI industry, written with multiple models and reviewed by @Zhiyi Wang.</>}</p>
+          <div className="sf-socials">
+            <a href="https://x.com/ZoeyWangff" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3.2l-7 8 8.2 10h-6.4l-5-6.6L4.7 21H1.5l7.5-8.6L1.2 3h6.5l4.6 6.1L17.5 3zm-1.1 16h1.8L7.7 5H5.8l10.6 14z"/></svg></a>
+            <a href="https://github.com/cabiriawzy-hub" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.72-2.78.62-3.37-1.36-3.37-1.36-.46-1.18-1.11-1.49-1.11-1.49-.91-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05.8-.23 1.65-.34 2.5-.34s1.7.11 2.5.34c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.35 4.8-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49C19.14 20.61 22 16.78 22 12.25 22 6.58 17.52 2 12 2z"/></svg></a>
+          </div>
+        </div>
       </footer>
+
+      {subOpen && <SubscribeModal lang={lang} onClose={() => setSubOpen(false)} />}
 
       <Detail
         items={ITEMS}
@@ -1242,6 +1284,39 @@ function App() {
         themesT={T.themes}
       />
     </>
+  );
+}
+
+function SubscribeModal({ lang, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const zh = lang === "zh";
+  return (
+    <div className="sub-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="sub-panel">
+        <button className="sub-close" onClick={onClose} aria-label="Close">&times;</button>
+        <p className="sub-kicker">{zh ? "订阅" : "Subscribe"}</p>
+        <p className="sub-q">{zh ? "怎么订阅？" : "How to subscribe"}</p>
+        <p className="sub-note">{zh
+          ? "本刊每月一期。加入订阅群，第一时间收到推送，也可在群里交流 AI 话题与对本刊的建议。"
+          : "One issue a month. Join a reader group to get each issue first and chat about AI and the magazine."}</p>
+        <div className="sub-grp">
+          <p className="sub-grp-h">{zh ? "字节内部同学" : "ByteDance colleagues"}</p>
+          <p className="sub-grp-sub">{zh
+            ? <>可在飞书搜索「<b>AI 慢读月刊｜推送群</b>」，或扫码加入。</>
+            : <>Search "<b>AI 慢读月刊｜推送群</b>" in Lark, or scan to join.</>}</p>
+          <img className="sub-qr" src="covers/bd-group-qr.png" alt={zh ? "字节内部订阅群二维码" : "Internal group QR"} onError={(e) => { e.target.parentElement.style.display = "none"; }} />
+        </div>
+        <div className="sub-grp">
+          <p className="sub-grp-h">{zh ? "外部读者" : "External readers"}</p>
+          <p className="sub-grp-sub">{zh ? "扫码加入读者群。" : "Scan to join the reader group."}</p>
+          <img className="sub-qr" src="covers/nonbd-group-qr.png" alt={zh ? "外部订阅群二维码" : "External group QR"} onError={(e) => { e.target.parentElement.style.display = "none"; }} />
+        </div>
+      </div>
+    </div>
   );
 }
 
