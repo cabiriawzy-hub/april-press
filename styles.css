@@ -1290,6 +1290,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   display: block; width: 200px; max-width: 60%; margin: 14px auto 0;
   border: 1px solid var(--rule);
 }
+.sub-p {
+  font-family: 'GT Sectra', 'Spectral', 'Source Han Serif SC', serif;
+  font-size: 15px; line-height: 1.8; color: var(--ink-soft); margin: 0 0 12px;
+}
+.sub-p b { color: var(--ink); font-weight: 600; }
+.sub-link {
+  color: var(--accent); border-bottom: 1px solid var(--accent);
+  font-weight: 600; white-space: nowrap; cursor: pointer;
+}
+.sub-link:hover { opacity: .7; }
 
 @media (max-width: 720px) {
   .sf-mast, .sf-grid { margin: 0 14px; }

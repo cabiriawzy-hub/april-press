@@ -1080,7 +1080,7 @@ function App() {
 
   const [filter, setFilter] = useState("all");
   const [openId, setOpenId] = useState(null);
-  const [subOpen, setSubOpen] = useState(false);
+  const [modal, setModal] = useState(null);
   const [coverMap, setCoverMap] = useState(() => ({ ...(window.COVER_ASSETS || {}) }));
 
   useEffect(() => {
@@ -1180,7 +1180,7 @@ function App() {
             <button className={lang === "zh" ? "active" : ""} onClick={() => setLang("zh")} title="中文" aria-label="中文">文</button>
             <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")} title="English" aria-label="English">A</button>
           </div>
-          <button className="sub-btn" onClick={() => setSubOpen(true)}>{lang === "zh" ? "订阅" : "Subscribe"}</button>
+          <button className="sub-btn" onClick={() => setModal("sub")}>{lang === "zh" ? "订阅" : "Subscribe"}</button>
         </div>
       </div>
 
@@ -1248,13 +1248,14 @@ function App() {
           <div className="sf-col">
             <h4>{lang === "zh" ? "关于" : "About"}</h4>
             <ul>
-              <li><a onClick={() => { document.querySelector(".editors") && document.querySelector(".editors").scrollIntoView({ behavior: "smooth", block: "start" }); }}>{lang === "zh" ? "关于本刊" : "About"}</a></li>
+              <li><a onClick={() => setModal("about")}>{lang === "zh" ? "关于本刊" : "About"}</a></li>
+              <li><a onClick={() => setModal("contact")}>{lang === "zh" ? "投稿与联系" : "Contact"}</a></li>
             </ul>
           </div>
           <div className="sf-col">
             <h4>{lang === "zh" ? "订阅" : "Subscribe"}</h4>
             <ul>
-              <li><a onClick={() => setSubOpen(true)}>{lang === "zh" ? "如何订阅" : "How to subscribe"}</a></li>
+              <li><a onClick={() => setModal("sub")}>{lang === "zh" ? "如何订阅" : "How to subscribe"}</a></li>
             </ul>
           </div>
         </div>
@@ -1269,7 +1270,7 @@ function App() {
         </div>
       </footer>
 
-      {subOpen && <SubscribeModal lang={lang} onClose={() => setSubOpen(false)} />}
+      {modal && <SiteModal kind={modal} lang={lang} onClose={() => setModal(null)} />}
 
       <Detail
         items={ITEMS}
@@ -1287,17 +1288,48 @@ function App() {
   );
 }
 
-function SubscribeModal({ lang, onClose }) {
+function SiteModal({ kind, lang, onClose }) {
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
   const zh = lang === "zh";
-  return (
-    <div className="sub-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="sub-panel">
-        <button className="sub-close" onClick={onClose} aria-label="Close">&times;</button>
+  const hideOnErr = (e) => { e.target.parentElement.style.display = "none"; };
+  let body;
+  if (kind === "about") {
+    body = (
+      <>
+        <p className="sub-kicker">{zh ? "关于本刊" : "About"}</p>
+        <p className="sub-q">{zh ? "为什么想到做这个？" : "Why make this?"}</p>
+        <p className="sub-p">{zh
+          ? "各种 AI 自动推送日报、耸人听闻的营销号太多了，追热点永远会慢半拍，鲜有深度思考；因此每隔一段时间把视野拉远到整个 AI 行业，或许能帮我们客观冷静地看待当前的发展与思潮。"
+          : "There are too many auto-pushed AI dailies and sensational marketing accounts; chasing hot takes is always half a beat behind, and seldom offers real reflection. Stepping back to look at the whole AI industry every once in a while may help us see the current developments and currents of thought more calmly and objectively."}</p>
+        <p className="sub-p">{zh
+          ? <>这份「月刊」不是新闻摘要，更像一本悉心编辑过的专题杂志。选题与原始信源由 <b>@Zhiyi Wang</b> 和 AI 共同筛选把控，力求每一章节都真实可靠。</>
+          : <>This monthly is not a news digest — it's more like a carefully edited themed magazine. Topics and primary sources are curated by <b>@Zhiyi Wang</b> together with AI, striving to keep every chapter truthful and reliable.</>}</p>
+        <p className="sub-q">{zh ? "原始信源" : "Primary Sources"}</p>
+        <p className="sub-p">{zh
+          ? <>每期内容的全部信息来源与采编方法已公开，可逐条核查：<a className="sub-link" href="https://bytedance.larkoffice.com/docx/N3MXdfiFjo2e82xaNN4cpfhEnng" target="_blank" rel="noopener">信息来源与采编方法 →</a></>
+          : <>The full source list and editorial method behind every issue are public and checkable line by line: <a className="sub-link" href="https://bytedance.larkoffice.com/docx/N3MXdfiFjo2e82xaNN4cpfhEnng" target="_blank" rel="noopener">Sources &amp; Method →</a></>}</p>
+      </>
+    );
+  } else if (kind === "contact") {
+    body = (
+      <>
+        <p className="sub-kicker">{zh ? "投稿与联系" : "Contact"}</p>
+        <p className="sub-note">{zh
+          ? <>编辑部 <b>@Zhiyi Wang</b><br/>微信号：<b>zy_cabiria</b></>
+          : <>Editorial desk <b>@Zhiyi Wang</b><br/>WeChat: <b>zy_cabiria</b></>}</p>
+        <div className="sub-grp" style={{ borderTop: 0 }}>
+          <img className="sub-qr" src="covers/wechat-qr.png" alt={zh ? "微信二维码" : "WeChat QR"} onError={hideOnErr} />
+          <p className="sub-grp-sub">{zh ? "扫二维码，添加我为朋友。" : "Scan the QR code to add me on WeChat."}</p>
+        </div>
+      </>
+    );
+  } else {
+    body = (
+      <>
         <p className="sub-kicker">{zh ? "订阅" : "Subscribe"}</p>
         <p className="sub-q">{zh ? "怎么订阅？" : "How to subscribe"}</p>
         <p className="sub-note">{zh
@@ -1308,13 +1340,21 @@ function SubscribeModal({ lang, onClose }) {
           <p className="sub-grp-sub">{zh
             ? <>可在飞书搜索「<b>AI 慢读月刊｜推送群</b>」，或扫码加入。</>
             : <>Search "<b>AI 慢读月刊｜推送群</b>" in Lark, or scan to join.</>}</p>
-          <img className="sub-qr" src="covers/bd-group-qr.png" alt={zh ? "字节内部订阅群二维码" : "Internal group QR"} onError={(e) => { e.target.parentElement.style.display = "none"; }} />
+          <img className="sub-qr" src="covers/bd-group-qr.png" alt={zh ? "字节内部订阅群二维码" : "Internal group QR"} onError={hideOnErr} />
         </div>
         <div className="sub-grp">
           <p className="sub-grp-h">{zh ? "外部读者" : "External readers"}</p>
           <p className="sub-grp-sub">{zh ? "扫码加入读者群。" : "Scan to join the reader group."}</p>
-          <img className="sub-qr" src="covers/nonbd-group-qr.png" alt={zh ? "外部订阅群二维码" : "External group QR"} onError={(e) => { e.target.parentElement.style.display = "none"; }} />
+          <img className="sub-qr" src="covers/nonbd-group-qr.png" alt={zh ? "外部订阅群二维码" : "External group QR"} onError={hideOnErr} />
         </div>
+      </>
+    );
+  }
+  return (
+    <div className="sub-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="sub-panel">
+        <button className="sub-close" onClick={onClose} aria-label="Close">&times;</button>
+        {body}
       </div>
     </div>
   );
